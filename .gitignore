@@ -1,0 +1,7 @@
+bin/
+data/
+*~
+*.swp
+*.swo
+gen
+gen.cpp
