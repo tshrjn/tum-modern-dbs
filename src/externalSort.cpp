@@ -65,6 +65,9 @@ void externalSort (int fdInput, uint64_t size, int fdOutput, uint64_t memSize) {
 		fwrite(&inputBuffer[0], sizeof(uint64_t), count, tmpf);		
 	}
 	
+	inputBuffer.clear();
+	inputBuffer.shrink_to_fit();
+	
 	// we need one buffer for each chunk plus 1 for buffering the output
 	uint64_t mergeBufferSize = count / (chunks+1);
 		
@@ -113,16 +116,7 @@ void externalSort (int fdInput, uint64_t size, int fdOutput, uint64_t memSize) {
 		mergePQ.pop();
 		outputBuffer[outputIndex] = min.value;
 		outputIndex++;
-		
-		// In case the output buffer is full, flush its content to the output file
-		if (outputIndex == mergeBufferSize-1) {
-			if (write(fdOutput, outputBuffer, outputIndex*sizeof(uint64_t)) 
-				!= (ssize_t) (outputIndex*sizeof(uint64_t))) {
-				cerr << "Writing to output file failed!" << endl;
-			}
-			outputIndex = 0;
-		}
-		
+				
 		// insert the next value of the chunk from which the value was taken
 		// (unless the buffer is empty)
 		MergeBuffer *sourceBuffer = mergeBuffers[min.index];
@@ -146,6 +140,15 @@ void externalSort (int fdInput, uint64_t size, int fdOutput, uint64_t memSize) {
 					sourceBuffer->finished = true;
 				}
 			}
+		}
+		
+		// In case the output buffer is full, flush its content to the output file
+		if (outputIndex == mergeBufferSize-1) {
+			if (write(fdOutput, outputBuffer, outputIndex*sizeof(uint64_t)) 
+				!= (ssize_t) (outputIndex*sizeof(uint64_t))) {
+				cerr << "Writing to output file failed!" << endl;
+			}
+			outputIndex = 0;
 		}
 	}
 	
