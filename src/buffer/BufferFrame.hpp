@@ -6,24 +6,26 @@
 
 const size_t blockSize = 4 * 4096;
 
-enum FrameState {
-	empty, // data not loaded yet
-	clean,  // data loaded, unmodified
-	dirty	// data loaded, has changed
+enum FrameState
+{
+    empty, // data not loaded yet
+    clean,  // data loaded, unmodified
+    dirty	// data loaded, has changed
 };
 
-class BufferFrame {
-	private:
-		uint64_t pageNumber;
-		FrameState state;
+class BufferFrame
+{
+private:
+    uint64_t pageNumber;
+    FrameState state;
 
-		void* data;
+    void* data;
 
-	public:
-		BufferFrame();
-		~BufferFrame();
+public:
+    BufferFrame();
+    ~BufferFrame();
 
-		void* getData();
+    void* getData();
 };
 
 #endif //  BUFFERFRAME_HPP

@@ -11,12 +11,12 @@ BufferManager::~BufferManager()
 
 }
 
-BufferFrame& BufferManager::fixPage(uint64_t pageId, bool exclusive) 
+BufferFrame& BufferManager::fixPage(uint64_t pageId, bool exclusive)
 {
-	
+
 }
 
-void BufferManager::unfixPage(BufferFrame& frame, bool isDirty) 
+void BufferManager::unfixPage(BufferFrame& frame, bool isDirty)
 {
 
 }

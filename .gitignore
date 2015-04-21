@@ -4,3 +4,4 @@ data/
 *.swo
 gen
 gen.cpp
+*.orig

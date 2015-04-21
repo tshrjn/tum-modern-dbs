@@ -3,17 +3,18 @@
 
 #include "BufferFrame.hpp"
 
-class BufferManager {
-	public:
+class BufferManager
+{
+public:
 
-		BufferManager(unsigned pageCount);
-		~BufferManager();
+    BufferManager(unsigned pageCount);
+    ~BufferManager();
 
-		BufferFrame& fixPage(uint64_t pageId, bool exclusive);
-		void unfixPage(BufferFrame& frame, bool isDirty);
+    BufferFrame& fixPage(uint64_t pageId, bool exclusive);
+    void unfixPage(BufferFrame& frame, bool isDirty);
 
-	private:
-	
+private:
+
 };
 
 #endif //  BUFFERMANAGER_HPP

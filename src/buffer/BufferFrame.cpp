@@ -1,8 +1,8 @@
 #include "BufferFrame.hpp"
 
-BufferFrame::BufferFrame() 
+BufferFrame::BufferFrame()
 {
-	state = FrameState::empty;
+    state = FrameState::empty;
 }
 
 BufferFrame::~BufferFrame()
@@ -13,6 +13,6 @@ BufferFrame::~BufferFrame()
 
 void* BufferFrame::getData()
 {
-	return data;
+    return data;
 }
 
