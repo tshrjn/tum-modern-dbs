@@ -9,7 +9,7 @@ sort: test/sort.cpp src/externalSort.hpp
 	$(CC) $(CFLAGS) -o bin/sort test/sort.cpp src/externalSort.cpp 
 	
 buffer: test/buffertest.cpp $(BUFFER_O)
-	$(CC) $(CFLAGS) -o bin/buffertest.cpp test/buffertest.cpp $(BUFFER_O)
+	$(CC) $(CFLAGS) -o bin/buffertest test/buffertest.cpp $(BUFFER_O)
 
 
 
