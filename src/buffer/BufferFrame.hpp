@@ -17,7 +17,7 @@ class BufferFrame
 {
 private:
     // File descriptor of the segment
-    uint64_t segmentFd;
+    int segmentFd;
     uint64_t pageID;
     // (start) position of the page in the segment file
     off_t pageOffsetInFile;
@@ -33,7 +33,7 @@ private:
     void writePage();
 
 public:
-    BufferFrame(uint16_t segmentFd, uint64_t pageID);
+    BufferFrame(int segmentFd, uint64_t pageID);
     ~BufferFrame();
 
     // Give access to the content of the buffered page

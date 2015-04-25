@@ -1,7 +1,7 @@
 #include "BufferFrame.hpp"
 #include <unistd.h>
 
-BufferFrame::BufferFrame(uint16_t segmentFd, uint64_t pageID)
+BufferFrame::BufferFrame(int segmentFd, uint64_t pageID)
     : segmentFd(segmentFd), pageID(pageID)
 {
     state = FrameState::empty;

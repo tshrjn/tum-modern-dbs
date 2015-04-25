@@ -45,7 +45,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive)
         throw std::runtime_error("The buffer manager has no available frame left and is incapabable of freeing an existing one!");
     }
 
-    uint16_t segmentFd = getSegmentFd(pageID >> 48);
+    int segmentFd = getSegmentFd(pageID >> 48);
     uint64_t actualPageID = pageID & ((1L << 48)-1);
 
     auto result = bufferFrameMap.emplace(std::piecewise_construct, std::forward_as_tuple(pageID), std::forward_as_tuple(segmentFd, actualPageID));

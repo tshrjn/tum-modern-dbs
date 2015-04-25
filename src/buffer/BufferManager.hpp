@@ -48,7 +48,7 @@ private:
     // Attempts to remove a page from main memory
     bool freeFrame(uint64_t pageID);
 
-    // Get a file descriptor fo the given segment ID
+    // Get a file descriptor for the given segment ID
     int getSegmentFd(uint16_t segmentID);
 };
 
