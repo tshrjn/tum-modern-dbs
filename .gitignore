@@ -4,3 +4,7 @@
 gen
 gen.cpp
 .idea/
+
+.cproject
+.project
+.settings/
