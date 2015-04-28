@@ -34,13 +34,13 @@ private:
     size_t maxPageCount;
 
     // Hashmap that maps page ids to the corresponding buffer frame
-    std::unordered_map<uint64_t, BufferFrame> bufferFrameMap;
+    std::unordered_map<uint64_t, BufferFrame*> bufferFrameMap;
 
     // Store file descriptors of opened segment files
     std::unordered_map<uint16_t, int> segmentsFdMap;
 
     // FIFO replacement strategy
-    std::queue<BufferFrame> fifo;
+    std::queue<BufferFrame*> fifo;
 
     // Check if we have space for another frame
     bool isFrameAvailable();

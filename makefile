@@ -1,5 +1,5 @@
 CC = clang++
-CFLAGS = -std=c++11 -march=native -O3 -Wall -pthread
+CFLAGS = -std=c++11 -march=native -O3 -Wall -pthread -g
 
 BUFFER_O = src/buffer/BufferManager.cpp src/buffer/BufferFrame.cpp
 

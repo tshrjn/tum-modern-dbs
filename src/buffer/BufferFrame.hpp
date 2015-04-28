@@ -40,6 +40,8 @@ public:
     void* getData();
     // Flush data to disk
     void flush();
+
+    void setDirty();
 };
 
 #endif //  BUFFERFRAME_HPP
