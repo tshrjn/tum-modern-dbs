@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <queue>
+#include <mutex>
 
 #include "BufferFrame.hpp"
 

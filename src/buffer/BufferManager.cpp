@@ -48,20 +48,20 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         // First try to lock the frame without block
         bool locked = false;
         if (exclusive) {
-            locked = foundFrame.lockWrite(false);
+            locked = foundFrame->lockWrite(false);
         } else {
-            locked = foundFrame.lockRead(false);
+            locked = foundFrame->lockRead(false);
         }
 
         // Unlock the BufferManager
-        mtx.unlock()
+        mtx.unlock();
 
         // If we could not lock it directly we wait for the unlock
         if(!locked) {
             if (exclusive) {
-                locked = foundFrame.lockWrite(true);
+                locked = foundFrame->lockWrite(true);
             } else {
-                locked = foundFrame.lockRead(true);
+                locked = foundFrame->lockRead(true);
             }
         }
     } else {
@@ -94,13 +94,13 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 
         // Frame is fresh in buffer -> Lock immediately
         if (exclusive) {
-            foundFrame.lockWrite(true);
+            foundFrame->lockWrite(true);
         } else {
-            foundFrame.lockRead(true);
+            foundFrame->lockRead(true);
         }
 
         // Unlock BufferManager
-        mtx.unlock()
+        mtx.unlock();
     }
     return *foundFrame;
 }
