@@ -62,7 +62,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         mtx.unlock();
 
         // If we could not lock it directly we wait for the unlock
-        if(!locked) {
+        if (!locked) {
             if (exclusive) {
 				std::cout << "BufferManager.fix: Needed to unlock buffer and wait for exclusive lock" \
 				   	<< std::endl;
@@ -111,8 +111,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         // Create new frame
         std::cout << "BufferManager.fix: Creating new Frame with pageID: " << pageID << std::endl;
         int segmentFd = getSegmentFd(pageID >> 48);
-        uint64_t actualPageID = pageID & ((1L << 48)-1);
-        frame = new BufferFrame(segmentFd, actualPageID);
+        frame = new BufferFrame(segmentFd, pageID);
         auto result = bufferFrameMap.insert(std::make_pair(pageID, frame));
         if (!result.second) {
             throw std::runtime_error("BufferManager.fix: Insert to buffer map not successful!");
@@ -179,7 +178,7 @@ int BufferManager::getSegmentFd(uint16_t segmentID) {
 			std::cout << "BufferManager.getSegment: failed to open file" << std::endl;
             throw std::runtime_error(std::strerror(errno));
         }
-        std::cout << "BufferManager.getSegmetn: new file descriptor " << fd << std::endl;
+        std::cout << "BufferManager.getSegment: new file descriptor " << fd << std::endl;
         // Store the file descriptor
         segmentsFdMap[segmentID] = fd;
     }

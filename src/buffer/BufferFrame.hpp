@@ -19,6 +19,7 @@ private:
     // File descriptor of the segment
     int segmentFd;
     uint64_t pageID;
+    uint64_t actualPageID;
     // (start) position of the page in the segment file
     off_t pageOffsetInFile;
 

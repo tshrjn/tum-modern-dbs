@@ -14,14 +14,15 @@ BufferFrame::BufferFrame(int segmentFd, uint64_t pageID)
     // Initially the data points to null and the state is empty
     data = nullptr;
     state = FrameState::empty;
-    pageOffsetInFile = pageID * blockSize;
+    actualPageID = pageID & ((1L << 48)-1);
+    pageOffsetInFile = actualPageID * blockSize;
     std::cout << "Frame.init: page= " << pageID << " offset=" << pageOffsetInFile << std::endl;
 }
 
 BufferFrame::~BufferFrame()
 {
 	// Destroy the lock on the buffFrame
-	// The bufferManager shoudl hold the last WriteLock when the destructor is called 
+	// The bufferManager should hold the last WriteLock when the destructor is called
 	pthread_rwlock_destroy(&frameLock);
 
     std::cout << "Frame.destroy: Free data page " << pageID << std::endl;
@@ -76,7 +77,7 @@ void BufferFrame::setDirty()
 // Lock frame for exclusive write
 bool BufferFrame::lockWrite(bool blocking)
 { 
-    if(!blocking) {
+    if (!blocking) {
         return pthread_rwlock_trywrlock(&frameLock) == 0;
     } else {
         return pthread_rwlock_wrlock(&frameLock) == 0;
@@ -85,7 +86,7 @@ bool BufferFrame::lockWrite(bool blocking)
 // Lock frame for read
 bool BufferFrame::lockRead(bool blocking)
 {
-    if(!blocking) {
+    if (!blocking) {
         return pthread_rwlock_tryrdlock(&frameLock) == 0;
     } else {
         return pthread_rwlock_rdlock(&frameLock) == 0;
