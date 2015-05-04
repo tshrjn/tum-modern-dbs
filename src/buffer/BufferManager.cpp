@@ -22,6 +22,7 @@ BufferManager::~BufferManager()
     // close all opened file descriptors
     for (auto& kv: segmentsFdMap)
         close(kv.second);
+
 }
 
 /*
@@ -34,7 +35,9 @@ BufferManager::~BufferManager()
  * If the page is not accessed exclusively the read lock is acquired
  */
 BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
-    BufferFrame *foundFrame = nullptr;
+	std::cout << "BufferManager.fix" << std::endl;
+
+    BufferFrame *frame = nullptr;
 
     // Lock the buffer manager
     // we need the lock as every page could be freed spontaneously
@@ -43,16 +46,16 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
     // Check if page is already in buffer, then just return existing frame (with rwlock)
     auto entry = bufferFrameMap.find(pageID);
     if (entry != bufferFrameMap.end()) {
-		std::cout << "BufferManager.Fix: Requested PageID " << pageID << " is already in Buffer" << std::endl;
+		std::cout << "BufferManager.fix: Requested PageID " << pageID << " is already in Buffer" << std::endl;
 
-        foundFrame = entry->second;
+        frame = entry->second;
 
         // First try to lock the frame without block
         bool locked = false;
         if (exclusive) {
-            locked = foundFrame->lockWrite(false);
+            locked = frame->lockWrite(false);
         } else {
-            locked = foundFrame->lockRead(false);
+            locked = frame->lockRead(false);
         }
 
         // Unlock the BufferManager
@@ -67,39 +70,40 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 		// Thread 1 tries to lock a nullptr -> Bamm
         if(!locked) {
             if (exclusive) {
-				std::cout << "BufferManager.Fix: Needed to unlock buffer and wait for exclusive lock" \
+				std::cout << "BufferManager.fix: Needed to unlock buffer and wait for exclusive lock" \
 				   	<< std::endl;
-                locked = foundFrame->lockWrite(true);
+                locked = frame->lockWrite(true);
             } else {
-				std::cout << "BufferManager.Fix: Needed to unlock buffer and wait for non-exclusive lock" \
+				std::cout << "BufferManager.fix: Needed to unlock buffer and wait for non-exclusive lock" \
 					<< std::endl;
-                locked = foundFrame->lockRead(true);
+                locked = frame->lockRead(true);
             }
         }
     } else {
-		std::cout << "BufferManager.Fix: Requested PageID " << pageID \
+		std::cout << "BufferManager.fix: Requested PageID " << pageID \
 			<< " was not in Buffer" << std::endl;
 
         // Frame could not be found
         // Try to find a free slot || replace unfixed pages
         if (!isFrameAvailable()) {
-			std::cout << "BufferManager.Fix: Buffer does not contain free frames" << std::endl;
+			std::cout << "BufferManager.fix: Buffer does not contain free frames" << std::endl;
 
             // Search a page that is not locked (framestate is not important)
 			BufferFrame *replacementCandidate = nullptr;
 			for (std::deque<BufferFrame*>::iterator it = fifo.begin();
-					it!=fifo.end(); ++it) {
+					it!=fifo.end(); ++it) {	
 				// Just try to acquire an exclusive lock without block
-				if((*it)->lockWrite(false)) {
+				if( (*it)->lockWrite(false) == 0) {
 					replacementCandidate = *it;
 					fifo.erase(it);
+					std::cout << "BufferManager.fix: Found replacement candidate with pageID " \
+						<< replacementCandidate->getPageID() << std::endl;
+					break;
 				}
 			}
 			if (replacementCandidate == nullptr) {
-				throw std::runtime_error("Could not allocate space for new buffer frame");
+				throw std::runtime_error("BufferManager.fix: Could not allocate space for new buffer frame");
 			} else {
-				std::cout << "BufferManager.Fix: Found replacement candidate with pageID " \
-					<< replacementCandidate->getPageID() << std::endl;
 
 				// Write page to disk if dirty
 				replacementCandidate->flush();
@@ -107,31 +111,31 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 				delete replacementCandidate;
 			}
         } else {
-			std::cout << "BufferManager.Fix: Buffer contains free frames" << std::endl;
+			std::cout << "BufferManager.fix: Buffer contains free frames" << std::endl;
 		}
 
         // Create new frame
-        std::cout << "BufferManager.Fix: Creating new Frame with pageID: " << pageID << std::endl;
+        std::cout << "BufferManager.fix: Creating new Frame with pageID: " << pageID << std::endl;
         int segmentFd = getSegmentFd(pageID >> 48);
         uint64_t actualPageID = pageID & ((1L << 48)-1);
-        BufferFrame* frame = new BufferFrame(segmentFd, actualPageID);
+        frame = new BufferFrame(segmentFd, actualPageID);
         auto result = bufferFrameMap.insert(std::make_pair(pageID, frame));
         if (!result.second) {
-            throw std::runtime_error("Insert to buffer map not successful!");
+            throw std::runtime_error("BufferManager.fix: Insert to buffer map not successful!");
         }
         fifo.push_back(result.first->second);
 
         // Frame is fresh in buffer -> Lock immediately
         if (exclusive) {
-            foundFrame->lockWrite(true);
+            frame->lockWrite(true);
         } else {
-            foundFrame->lockRead(true);
+            frame->lockRead(true);
         }
 
         // Unlock BufferManager
         mtx.unlock();
     }
-    return *foundFrame;
+    return *frame;
 }
 
 /*
@@ -141,9 +145,12 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
  */
 void BufferManager::unfixPage(BufferFrame& frame, bool isDirty)
 {
-    if (isDirty)
+	std::cout << "BufferManager.unfix" << std::endl;
+    if (isDirty) {
         frame.setDirty();
+	}
     frame.unlock();
+	std::cout << "BufferManager.unfix: Unlocked page " << frame.getPageID() << std::endl;
 }
 
 /*
@@ -158,24 +165,27 @@ bool BufferManager::isFrameAvailable() {
  * The name of the segment file is segmentID and is stored in the subdirectory data/.
  */
 int BufferManager::getSegmentFd(uint16_t segmentID) {
-    int fd;
+	std::cout << "BufferManager.getSegment" << std::endl;
+	
+	int fd;
 
     // Check if we already have the file open
     auto entry = segmentsFdMap.find(segmentID);
     if (entry != segmentsFdMap.end()) {
         fd = entry->second;
-        std::cout << "return existing fd: " << segmentID << std::endl;
+        std::cout << "BufferManager.getSegment: return existing fd=" << segmentID << std::endl;
     } else {
         // Create a new segment file using the segmentID
         char filename[30];
         sprintf(filename, "data/%d", segmentID);
         // Open the segment file
-        std::cout << "open segment file: " << segmentID << std::endl;
+        std::cout << "BufferManager.getSegment: open segment file " << segmentID << std::endl;
         fd = open(filename, O_RDWR | O_CREAT, 0600);
         if (fd < 0) {
+			std::cout << "BufferManager.getSegment: failed to open file" << std::endl;
             throw std::runtime_error(std::strerror(errno));
         }
-        std::cout << "fd: " << fd << std::endl;
+        std::cout << "BufferManager.getSegmetn: new file descriptor " << fd << std::endl;
         // Store the file descriptor
         segmentsFdMap[segmentID] = fd;
     }

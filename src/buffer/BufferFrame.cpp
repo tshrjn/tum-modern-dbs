@@ -46,8 +46,6 @@ void BufferFrame::readPage()
     std::cout << "Frame.read: Read data of page " << pageID << std::endl;
     data = malloc(blockSize);
     int bytesRead = pread(segmentFd, data, blockSize, pageOffsetInFile);
-	assert(bytesRead==blockSize);
-
     state = FrameState::clean;
 }
 
@@ -56,8 +54,6 @@ void BufferFrame::writePage()
 {
     std::cout << "Frame.write: Write data of page " << pageID << std::endl;
     int bytesWritten = pwrite(segmentFd, data, blockSize, pageOffsetInFile);
-	assert(bytesWritten==blockSize);
-
     state = FrameState::clean;
 }
 
