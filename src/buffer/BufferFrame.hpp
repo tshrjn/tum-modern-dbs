@@ -49,6 +49,10 @@ public:
 
     void setDirty();
 
+	uint64_t getPageID() {
+		return pageID;
+	}
+
     // Exclusive and Non-Exclusive Locks
     bool lockWrite(bool blocking);
     bool lockRead(bool blocking);

@@ -2,7 +2,7 @@
 #define BUFFERMANAGER_HPP
 
 #include <unordered_map>
-#include <queue>
+#include <deque>
 #include <mutex>
 
 #include "BufferFrame.hpp"
@@ -44,13 +44,12 @@ private:
     std::unordered_map<uint16_t, int> segmentsFdMap;
 
     // FIFO replacement strategy
-    std::queue<BufferFrame*> fifo;
+	// We need to iterate over the queue in order to find the first unfixed frame
+	// Therefore we better use a std::deqeue instead of a std::queue
+    std::deque<BufferFrame*> fifo;
 
     // Check if we have space for another frame
     bool isFrameAvailable();
-
-    // Attempts to remove a page from main memory
-    bool freeFrame(uint64_t pageID);
 
     // Get a file descriptor for the given segment ID
     int getSegmentFd(uint16_t segmentID);

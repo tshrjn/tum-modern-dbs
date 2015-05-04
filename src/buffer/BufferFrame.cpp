@@ -3,23 +3,28 @@
 #include <stdexcept>
 #include <cstring>
 #include <iostream>
+#include <assert.h>
 
 BufferFrame::BufferFrame(int segmentFd, uint64_t pageID)
     : segmentFd(segmentFd), pageID(pageID)
 {
-    // initialize the read write lock
+    // Initialize the read write lock
     pthread_rwlock_init(&frameLock, NULL);
 
-    // initially the data points to null and the state is empty
+    // Initially the data points to null and the state is empty
     data = nullptr;
     state = FrameState::empty;
     pageOffsetInFile = pageID * blockSize;
-    std::cout << "page: " << pageID << "\t offset:" << pageOffsetInFile << std::endl;
+    std::cout << "Frame.init: page= " << pageID << " offset=" << pageOffsetInFile << std::endl;
 }
 
 BufferFrame::~BufferFrame()
 {
-    std::cout << "free data page " << pageID << std::endl;
+	// Destroy the lock on the buffFrame
+	// The bufferManager shoudl hold the last WriteLock when the destructor is called 
+	pthread_rwlock_destroy(&frameLock);
+
+    std::cout << "Frame.destroy: Free data page " << pageID << std::endl;
     if (data != nullptr) {
         free(data);
         data = nullptr;
@@ -29,7 +34,7 @@ BufferFrame::~BufferFrame()
 // Give access to the content of the buffered page
 void* BufferFrame::getData()
 {
-    std::cout << "get data from page " << pageID << std::endl;
+    std::cout << "Frame.getData: Get data from page " << pageID << std::endl;
     if (state == FrameState::empty)
         readPage();
     return data;
@@ -38,9 +43,10 @@ void* BufferFrame::getData()
 // Read page from disk
 void BufferFrame::readPage()
 {
-    std::cout << "read data of page " << pageID << std::endl;
+    std::cout << "Frame.read: Read data of page " << pageID << std::endl;
     data = malloc(blockSize);
     int bytesRead = pread(segmentFd, data, blockSize, pageOffsetInFile);
+	assert(bytesRead==blockSize);
 
     state = FrameState::clean;
 }
@@ -48,15 +54,17 @@ void BufferFrame::readPage()
 // Write page to disk
 void BufferFrame::writePage()
 {
-    std::cout << "write data of page " << pageID << std::endl;
-    int bytesRead = pwrite(segmentFd, data, blockSize, pageOffsetInFile);
+    std::cout << "Frame.write: Write data of page " << pageID << std::endl;
+    int bytesWritten = pwrite(segmentFd, data, blockSize, pageOffsetInFile);
+	assert(bytesWritten==blockSize);
+
     state = FrameState::clean;
 }
 
 // Flush frame to disk
 void BufferFrame::flush()
 {
-    std::cout << "flush data of page " << pageID << std::endl;
+    std::cout << "Frame.flush: Flush data of page " << pageID << std::endl;
     // Writeback only if page has been modified
     if (state == FrameState::dirty)
         writePage();

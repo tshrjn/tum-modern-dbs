@@ -40,9 +40,11 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
     // we need the lock as every page could be freed spontaneously
     mtx.lock();
 
-    // Check if page is already in buffer, then just return existing frame
+    // Check if page is already in buffer, then just return existing frame (with rwlock)
     auto entry = bufferFrameMap.find(pageID);
-    if (entry == bufferFrameMap.end()) {
+    if (entry != bufferFrameMap.end()) {
+		std::cout << "BufferManager.Fix: Requested PageID " << pageID << " is already in Buffer" << std::endl;
+
         foundFrame = entry->second;
 
         // First try to lock the frame without block
@@ -57,24 +59,59 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         mtx.unlock();
 
         // If we could not lock it directly we wait for the unlock
+		// @TODO This could be a race condition as that could happen:
+		// Thread 1 finds frame 1 with write-lock
+		// Thread 1 unlocks mtx
+		// Thread 2 releases frame 1
+		// Thread 3 replaces frame 1
+		// Thread 1 tries to lock a nullptr -> Bamm
         if(!locked) {
             if (exclusive) {
+				std::cout << "BufferManager.Fix: Needed to unlock buffer and wait for exclusive lock" \
+				   	<< std::endl;
                 locked = foundFrame->lockWrite(true);
             } else {
+				std::cout << "BufferManager.Fix: Needed to unlock buffer and wait for non-exclusive lock" \
+					<< std::endl;
                 locked = foundFrame->lockRead(true);
             }
         }
     } else {
-        // Frame could not be found
-        // Try to find a free slot || replace dirty pages
+		std::cout << "BufferManager.Fix: Requested PageID " << pageID \
+			<< " was not in Buffer" << std::endl;
 
-        // Try to replace something
+        // Frame could not be found
+        // Try to find a free slot || replace unfixed pages
         if (!isFrameAvailable()) {
-            // ...
-        }
+			std::cout << "BufferManager.Fix: Buffer does not contain free frames" << std::endl;
+
+            // Search a page that is not locked (framestate is not important)
+			BufferFrame *replacementCandidate = nullptr;
+			for (std::deque<BufferFrame*>::iterator it = fifo.begin();
+					it!=fifo.end(); ++it) {
+				// Just try to acquire an exclusive lock without block
+				if((*it)->lockWrite(false)) {
+					replacementCandidate = *it;
+					fifo.erase(it);
+				}
+			}
+			if (replacementCandidate == nullptr) {
+				throw std::runtime_error("Could not allocate space for new buffer frame");
+			} else {
+				std::cout << "BufferManager.Fix: Found replacement candidate with pageID " \
+					<< replacementCandidate->getPageID() << std::endl;
+
+				// Write page to disk if dirty
+				replacementCandidate->flush();
+				bufferFrameMap.erase(replacementCandidate->getPageID());
+				delete replacementCandidate;
+			}
+        } else {
+			std::cout << "BufferManager.Fix: Buffer contains free frames" << std::endl;
+		}
 
         // Create new frame
-        std::cout << "pid: " << pageID << std::endl;
+        std::cout << "BufferManager.Fix: Creating new Frame with pageID: " << pageID << std::endl;
         int segmentFd = getSegmentFd(pageID >> 48);
         uint64_t actualPageID = pageID & ((1L << 48)-1);
         BufferFrame* frame = new BufferFrame(segmentFd, actualPageID);
@@ -82,15 +119,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         if (!result.second) {
             throw std::runtime_error("Insert to buffer map not successful!");
         }
-        fifo.push(result.first->second);
-
-        // Did not work
-        // Either the FrameMap does not contain empty slots
-        // Or there are no Frames that can be replaced
-        if (foundFrame == nullptr) {
-            mtx.unlock();
-            throw std::runtime_error("Could not replace an existing frame!");
-        }
+        fifo.push_back(result.first->second);
 
         // Frame is fresh in buffer -> Lock immediately
         if (exclusive) {
@@ -124,19 +153,6 @@ bool BufferManager::isFrameAvailable() {
     return bufferFrameMap.size() < maxPageCount;
 }
 
-/*
- * Attempts to remove a page from main memory.
- * Returns true if successful, false otherwise.
- */
-bool BufferManager::freeFrame(uint64_t pageID) {
-    // @TODO: When can't we just write a page back to disk?
-    std::cout << "CALLED FREEFRAME" << std::endl;
-    BufferFrame* bufferFrame = fifo.front();
-    bufferFrameMap.erase(pageID);
-    fifo.pop();
-    delete bufferFrame;
-    return true;
-}
 
 /**
  * The name of the segment file is segmentID and is stored in the subdirectory data/.
