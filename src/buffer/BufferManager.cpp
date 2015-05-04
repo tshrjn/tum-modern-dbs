@@ -5,8 +5,6 @@
 #include <unistd.h>
 #include <iostream>
 
-//@TODO: Multi-threading support
-
 // Create new instance that keeps up to pageCount frames in main memory
 BufferManager::BufferManager(size_t pageCount)
         : maxPageCount(pageCount)
@@ -31,34 +29,80 @@ BufferManager::~BufferManager()
  * It fails if no free frame is available and no frame can be freed.
  * The page ID splits into a segment ID and an actual page ID.
  * Each page is stored disk in a file with the same name as its segment ID.
+ *
+ * If the page is accessed exclusively the write lock is acquired and all readers are blocked
+ * If the page is not accessed exclusively the read lock is acquired
  */
-BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive)
-{
-    // @TODO: What if this or the existing entry should be exclusive?
+BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
+    BufferFrame *foundFrame = nullptr;
 
-    // Check if page is already in buffered, then just return existing frame
+    // Lock the buffer manager
+    // we need the lock as every page could be freed spontaneously
+    mtx.lock();
+
+    // Check if page is already in buffer, then just return existing frame
     auto entry = bufferFrameMap.find(pageID);
-    if (entry != bufferFrameMap.end()) {
-        return *entry->second;
+    if (entry == bufferFrameMap.end()) {
+        foundFrame = entry->second;
+
+        // First try to lock the frame without block
+        bool locked = false;
+        if (exclusive) {
+            locked = foundFrame.lockWrite(false);
+        } else {
+            locked = foundFrame.lockRead(false);
+        }
+
+        // Unlock the BufferManager
+        mtx.unlock()
+
+        // If we could not lock it directly we wait for the unlock
+        if(!locked) {
+            if (exclusive) {
+                locked = foundFrame.lockWrite(true);
+            } else {
+                locked = foundFrame.lockRead(true);
+            }
+        }
+    } else {
+        // Frame could not be found
+        // Try to find a free slot || replace dirty pages
+
+        // Try to replace something
+        if (!isFrameAvailable()) {
+            // ...
+        }
+
+        // Create new frame
+        std::cout << "pid: " << pageID << std::endl;
+        int segmentFd = getSegmentFd(pageID >> 48);
+        uint64_t actualPageID = pageID & ((1L << 48)-1);
+        BufferFrame* frame = new BufferFrame(segmentFd, actualPageID);
+        auto result = bufferFrameMap.insert(std::make_pair(pageID, frame));
+        if (!result.second) {
+            throw std::runtime_error("Insert to buffer map not successful!");
+        }
+        fifo.push(result.first->second);
+
+        // Did not work
+        // Either the FrameMap does not contain empty slots
+        // Or there are no Frames that can be replaced
+        if (foundFrame == nullptr) {
+            mtx.unlock();
+            throw std::runtime_error("Could not replace an existing frame!");
+        }
+
+        // Frame is fresh in buffer -> Lock immediately
+        if (exclusive) {
+            foundFrame.lockWrite(true);
+        } else {
+            foundFrame.lockRead(true);
+        }
+
+        // Unlock BufferManager
+        mtx.unlock()
     }
-
-    // If the page isn't fixed yet, check if we have the space to load another frame.
-    if (!isFrameAvailable() && !freeFrame(pageID)) {
-        throw std::runtime_error("The buffer manager has no available frame left and is incapabable of freeing an existing one!");
-    }
-
-    std::cout << "pid: " << pageID << std::endl;
-    int segmentFd = getSegmentFd(pageID >> 48);
-    uint64_t actualPageID = pageID & ((1L << 48)-1);
-
-    BufferFrame* frame = new BufferFrame(segmentFd, actualPageID);
-    auto result = bufferFrameMap.insert(std::make_pair(pageID, frame));
-    if (!result.second)
-        throw std::runtime_error("Insert to buffer map not successful!");
-
-    fifo.push(result.first->second);
-
-    return *frame;
+    return *foundFrame;
 }
 
 /*
@@ -70,6 +114,7 @@ void BufferManager::unfixPage(BufferFrame& frame, bool isDirty)
 {
     if (isDirty)
         frame.setDirty();
+    frame.unlock();
 }
 
 /*
@@ -90,7 +135,6 @@ bool BufferManager::freeFrame(uint64_t pageID) {
     bufferFrameMap.erase(pageID);
     fifo.pop();
     delete bufferFrame;
-
     return true;
 }
 

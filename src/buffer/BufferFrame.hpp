@@ -22,6 +22,10 @@ private:
     // (start) position of the page in the segment file
     off_t pageOffsetInFile;
 
+    // Read/Write lock for a single bufferframe
+    // This lock is used to implement the exclusive or shared access of the frame
+    pthread_rwlock_t frameLock;
+
     // current state of the page (empty (not loaded), clean, dirty)
     FrameState state;
     // Data contained in this page
@@ -29,8 +33,10 @@ private:
 
     // Read page from disk
     void readPage();
-    // Wrtie page to disk
+    // Write page to disk
     void writePage();
+
+   
 
 public:
     BufferFrame(int segmentFd, uint64_t pageID);
@@ -42,6 +48,11 @@ public:
     void flush();
 
     void setDirty();
+
+    // Exclusive and Non-Exclusive Locks
+    bool lockWrite(bool blocking);
+    bool lockRead(bool blocking);
+    void unlock();
 };
 
 #endif //  BUFFERFRAME_HPP

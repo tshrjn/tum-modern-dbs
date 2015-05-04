@@ -33,6 +33,9 @@ private:
     // maximum number of bufferd pages
     size_t maxPageCount;
 
+    // has table mutex
+    std::mutex mtx;
+
     // Hashmap that maps page ids to the corresponding buffer frame
     std::unordered_map<uint64_t, BufferFrame*> bufferFrameMap;
 

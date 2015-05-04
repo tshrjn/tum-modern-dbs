@@ -7,6 +7,10 @@
 BufferFrame::BufferFrame(int segmentFd, uint64_t pageID)
     : segmentFd(segmentFd), pageID(pageID)
 {
+    // initialize the read write lock
+    pthread_rwlock_init(&frameLock, NULL);
+
+    // initially the data points to null and the state is empty
     data = nullptr;
     state = FrameState::empty;
     pageOffsetInFile = pageID * blockSize;
@@ -61,4 +65,29 @@ void BufferFrame::flush()
 void BufferFrame::setDirty()
 {
     state = FrameState::dirty;
+}
+
+
+// Lock frame for exclusive write
+bool BufferFrame::lockWrite(bool blocking)
+{ 
+    if(!blocking) {
+        return pthread_rwlock_trywrlock(&frameLock);
+    } else {
+        return pthread_rwlock_wrlock(&frameLock);
+    }
+}
+// Lock frame for read
+bool BufferFrame::lockRead(bool blocking)
+{
+    if(!blocking) {
+        return pthread_rwlock_tryrdlock(&frameLock);
+    } else {
+        return pthread_rwlock_rdlock(&frameLock);
+    }
+}
+// Release read or write
+void BufferFrame::unlock()
+{
+    pthread_rwlock_unlock(&frameLock);
 }
