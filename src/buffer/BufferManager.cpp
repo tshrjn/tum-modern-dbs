@@ -62,12 +62,6 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         mtx.unlock();
 
         // If we could not lock it directly we wait for the unlock
-		// @TODO This could be a race condition as that could happen:
-		// Thread 1 finds frame 1 with write-lock
-		// Thread 1 unlocks mtx
-		// Thread 2 releases frame 1
-		// Thread 3 replaces frame 1
-		// Thread 1 tries to lock a nullptr -> Bamm
         if(!locked) {
             if (exclusive) {
 				std::cout << "BufferManager.fix: Needed to unlock buffer and wait for exclusive lock" \
@@ -93,7 +87,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 			for (std::deque<BufferFrame*>::iterator it = fifo.begin();
 					it!=fifo.end(); ++it) {	
 				// Just try to acquire an exclusive lock without block
-				if( (*it)->lockWrite(false) == 0) {
+				if((*it)->lockWrite(false)) {
 					replacementCandidate = *it;
 					fifo.erase(it);
 					std::cout << "BufferManager.fix: Found replacement candidate with pageID " \

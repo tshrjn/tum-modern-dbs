@@ -45,7 +45,8 @@ void BufferFrame::readPage()
 {
     std::cout << "Frame.read: Read data of page " << pageID << std::endl;
     data = malloc(blockSize);
-    int bytesRead = pread(segmentFd, data, blockSize, pageOffsetInFile);
+    // We do not need to check if the byte count is ok
+	pread(segmentFd, data, blockSize, pageOffsetInFile);
     state = FrameState::clean;
 }
 
@@ -53,7 +54,7 @@ void BufferFrame::readPage()
 void BufferFrame::writePage()
 {
     std::cout << "Frame.write: Write data of page " << pageID << std::endl;
-    int bytesWritten = pwrite(segmentFd, data, blockSize, pageOffsetInFile);
+    pwrite(segmentFd, data, blockSize, pageOffsetInFile);
     state = FrameState::clean;
 }
 
@@ -76,18 +77,18 @@ void BufferFrame::setDirty()
 bool BufferFrame::lockWrite(bool blocking)
 { 
     if(!blocking) {
-        return pthread_rwlock_trywrlock(&frameLock);
+        return pthread_rwlock_trywrlock(&frameLock) == 0;
     } else {
-        return pthread_rwlock_wrlock(&frameLock);
+        return pthread_rwlock_wrlock(&frameLock) == 0;
     }
 }
 // Lock frame for read
 bool BufferFrame::lockRead(bool blocking)
 {
     if(!blocking) {
-        return pthread_rwlock_tryrdlock(&frameLock);
+        return pthread_rwlock_tryrdlock(&frameLock) == 0;
     } else {
-        return pthread_rwlock_rdlock(&frameLock);
+        return pthread_rwlock_rdlock(&frameLock) == 0;
     }
 }
 // Release read or write
