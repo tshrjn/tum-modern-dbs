@@ -18,7 +18,7 @@ Parser.o: src/Parser.cpp src/Parser.hpp
 	$(CXX) $(CXXFLAGS) -c src/Parser.cpp -o obj/Parser.o
 
 parser: Schema.o Parser.o src/Schema.hpp src/Types.hpp src/parser.cpp
-	$(CXX) $(CXXFLAGS) obj/Parser.o obj/Schema.o src/parser.cpp -o obj/parser
+	$(CXX) $(CXXFLAGS) obj/Parser.o obj/Schema.o src/parser.cpp -o bin/parser
 
 clean:
 	rm -rf bin/* obj/*
