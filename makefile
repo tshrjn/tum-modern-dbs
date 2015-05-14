@@ -3,7 +3,7 @@ CXXFLAGS = -std=c++11 -march=native -O3 -Wall -pthread -g
 
 BUFFER_O = src/buffer/BufferManager.cpp src/buffer/BufferFrame.cpp
 
-all: sort buffer parser
+all: sort buffer parser schema
 
 sort: test/sort.cpp src/externalSort.hpp
 	$(CC) $(CXXFLAGS) -o bin/sort test/sort.cpp src/externalSort.cpp 
