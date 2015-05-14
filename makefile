@@ -20,5 +20,12 @@ Parser.o: src/Parser.cpp src/Parser.hpp
 parser: Schema.o Parser.o src/Schema.hpp src/Types.hpp src/parser.cpp
 	$(CXX) $(CXXFLAGS) obj/Parser.o obj/Schema.o src/parser.cpp -o bin/parser
 
+schema: test/schemaTest.cpp src/Parser.cpp src/Schema.cpp src/SchemaSegment.cpp $(BUFFER_O)
+	$(CC) $(CXXFLAGS) -o bin/schema test/schemaTest.cpp src/Parser.cpp src/Schema.cpp src/SchemaSegment.cpp $(BUFFER_O)
+
+slottedPages: test/slottedTest.cpp src/Schema.cpp src/SPSegment.cpp $(BUFFER_O)
+	$(CC) $(CXXFLAGS) -o bin/slottedPages test/slottedTest.cpp src/SPSegment.cpp $(BUFFER_O)
+
+
 clean:
 	rm -rf bin/* obj/*

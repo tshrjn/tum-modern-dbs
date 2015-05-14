@@ -15,3 +15,12 @@ Run with:
 $ make buffer
 $ ./bin/buffertest <pagesOnDisk> <pagesInRAM> <threads>
 ```
+
+
+## Assignment 03
+
+Create schema with:
+```bash
+$ make schema
+$ ./bin/schema test/test.sql
+```
