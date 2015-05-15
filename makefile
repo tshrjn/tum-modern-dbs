@@ -17,8 +17,8 @@ Schema.o: src/Schema.cpp src/Schema.hpp
 Parser.o: src/Parser.cpp src/Parser.hpp
 	$(CXX) $(CXXFLAGS) -c src/Parser.cpp -o obj/Parser.o
 
-parser: Schema.o Parser.o src/Schema.hpp src/Types.hpp src/parser.cpp
-	$(CXX) $(CXXFLAGS) obj/Parser.o obj/Schema.o src/parser.cpp -o bin/parser
+parser: Schema.o Parser.o src/Schema.hpp src/Types.hpp src/ParserCLI.cpp
+	$(CXX) $(CXXFLAGS) obj/Parser.o obj/Schema.o src/ParserCLI.cpp -o bin/parser
 
 schema: test/schemaTest.cpp src/Parser.cpp src/Schema.cpp src/SchemaSegment.cpp $(BUFFER_O)
 	$(CC) $(CXXFLAGS) -o bin/schema test/schemaTest.cpp src/Parser.cpp src/Schema.cpp src/SchemaSegment.cpp $(BUFFER_O)
