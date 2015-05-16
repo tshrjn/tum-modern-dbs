@@ -18,7 +18,9 @@ SchemaSegment::SchemaSegment(BufferManager& bm, uint64_t id)
 }
 
 /**
- * @TODO: This only works if the schema requires less than a page in size.
+ * Phlip: This only works if the schema requires less than a page in size.
+ * Andre: According to Prof. Neumann that is totally ok!
+ * As example he told us that MySQL will fail with a schema larger than page size
  */
 void SchemaSegment::serialize()
 {
