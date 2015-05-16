@@ -1,0 +1,10 @@
+include src/sort/LocalMakefile
+include src/buffer/LocalMakefile
+include src/schema/LocalMakefile
+include src/pages/LocalMakefile
+
+bin/%.o: src/%.cpp 
+	$(CHECKDIR)
+	$(CC) -o$@ -c $(CXXFLAGS) $<
+
+obj_segment:=bin/SchemaSegment.o bin/Segment.o bin/SPSegment.o

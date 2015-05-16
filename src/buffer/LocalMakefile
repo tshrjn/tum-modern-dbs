@@ -1,0 +1,5 @@
+bin/buffer/%.o: src/buffer/%.cpp 
+	$(CHECKDIR)
+	$(CC) -o$@ -c $(CXXFLAGS) $<
+
+obj_buffer:=bin/buffer/BufferFrame.o bin/buffer/BufferManager.o

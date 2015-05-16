@@ -1,0 +1,5 @@
+bin/schema/%.o: src/schema/%.cpp 
+	$(CHECKDIR)
+	$(CC) -o$@ -c $(CXXFLAGS) $<
+
+obj_schema:=bin/schema/Parser.o bin/schema/Schema.o bin/schema/Types.o
