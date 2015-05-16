@@ -5,6 +5,9 @@
 #include <string>
 #include "Types.hpp"
 
+#include <iostream>
+#include <string>
+
 struct Schema {
    struct Relation {
       struct Attribute {
@@ -21,5 +24,9 @@ struct Schema {
    };
    std::vector<Schema::Relation> relations;
    std::string toString() const;
+
+public:
+   std::string serialize() const;
+   static std::unique_ptr<Schema> deserialize(const char *data);
 };
 #endif

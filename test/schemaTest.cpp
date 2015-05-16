@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
         // test if deserialized schema is equal to the original schema
         std::unique_ptr<Schema> originalSchema = parser.parse();
         if (originalSchema->toString().compare(schemaSegment2.getSchema()->toString()) == 0) {
-            cout << "test successful" << endl;
+            cout << "Test successfull" << endl;
             return 0;
         }
     } catch (ParserError& pe) {
@@ -37,6 +37,6 @@ int main(int argc, char* argv[])
         cerr << e.what() << endl;
     }
 
-    cerr << "test failed" << endl;
+    cerr << "Test failed" << endl;
     return 1;
 }

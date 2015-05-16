@@ -34,3 +34,91 @@ std::string Schema::toString() const {
    }
    return out.str();
 }
+
+std::string Schema::serialize() const {
+   std::cout << "Schema.serialize" << std::endl;
+
+   std::stringstream out;
+
+    // Transform schema object to an easily readable string.
+    out << relations.size() << std::endl;
+    for (const Schema::Relation& rel : relations) {
+        out << rel.name << " " << rel.attributes.size() << " " << rel.primaryKey.size() << std::endl;
+        for (unsigned keyId : rel.primaryKey)
+            out << keyId << " ";
+        out << std::endl;
+        for (const auto& attr : rel.attributes) {
+            out << attr.name << " ";
+            if (attr.type == Types::Tag::Integer) {
+                out << "0";
+            } else {
+                out << "1";
+            }
+            out << " " << attr.len << " " << (attr.notNull ? "1" : "0") << std::endl;
+        }
+    }
+
+    // Store the string of the schema in the data pointer of a buffer frame.
+    std::string schemaString = out.str();
+
+    std::cout << "Schema.serialize: Successfully serialzed schema" << std::endl; 
+    std::cout << schemaString << std::endl;
+
+    return schemaString;
+}
+
+std::unique_ptr<Schema> Schema::deserialize(const char *data) {
+   std::cout << "Schema.deserialize" << std::endl;
+
+   auto schema = std::unique_ptr<Schema>(new Schema());
+
+   std::stringstream ss;
+   ss << data;
+
+   // Build a new schema from scratch
+   int relations;
+   ss >> relations;
+   // parse relations
+   for (int i = 0; i < relations; i++) {
+      std::string name;
+      int attributes, keys;
+      ss >> name >> attributes >> keys;
+
+      Schema::Relation relation(name);
+
+      // parse keys
+      for (int j = 0; j < keys; j++) {
+         unsigned key;
+         ss >> key;
+         relation.primaryKey.push_back(key);
+      }
+
+      // parse attributes
+      for (int j = 0; j < attributes; j++) {
+         std::string name;
+         unsigned type;
+         unsigned len;
+         bool notNull;
+
+         ss >> name >> type >> len >> notNull;
+
+         Schema::Relation::Attribute attribute;
+         attribute.name = name;
+         if (type == 0) {
+            attribute.type = Types::Tag::Integer;
+         } else {
+            attribute.type = Types::Tag::Char;
+         }
+         attribute.len = len;
+         attribute.notNull = notNull;
+
+         relation.attributes.push_back(attribute);
+      }
+      schema->relations.push_back(relation);
+   }
+
+   std::cout << "Schema.deserialize: Successfully deserialized schema" << std::endl; 
+   std::cout << schema->toString() << std::endl;
+
+   return move(schema);
+}

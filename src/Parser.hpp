@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include "Schema.hpp"
+#include <sstream>
 
 class ParserError : std::exception {
    std::string msg;
@@ -15,7 +16,10 @@ class ParserError : std::exception {
    ParserError(unsigned line, const std::string& m) : msg(m), line(line) {}
    ~ParserError() throw() {}
    const char* what() const throw() {
-      return msg.c_str();
+      std::stringstream ss;
+      ss << line << ": ";
+      ss << msg;
+      return ss.str().c_str();
    }
 };
 
