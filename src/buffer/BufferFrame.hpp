@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <sys/types.h>
+#include <pthread.h>
+
 const size_t blockSize = 4 * 4096;
 
 enum FrameState
