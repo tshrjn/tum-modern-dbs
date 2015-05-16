@@ -3,7 +3,7 @@
 #include <memory>
 #include "Segment.hpp"
 #include "buffer/BufferManager.hpp"
-#include "Schema.hpp"
+#include "schema/Schema.hpp"
 
 class SchemaSegment : public Segment {
 public:

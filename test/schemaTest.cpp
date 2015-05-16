@@ -2,8 +2,8 @@
 #include <memory>
 #include <string>
 #include "../src/buffer/BufferManager.hpp"
-#include "../src/Parser.hpp"
-#include "../src/Schema.hpp"
+#include "../src/schema/Parser.hpp"
+#include "../src/schema/Schema.hpp"
 #include "../src/SchemaSegment.hpp"
 
 using namespace std;

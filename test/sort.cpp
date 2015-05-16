@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "../src/externalSort.hpp"
+#include "../src/sort/externalSort.hpp"
 
 using namespace std;
 
