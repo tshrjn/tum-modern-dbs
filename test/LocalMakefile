@@ -1,7 +1,6 @@
 bin/test/%.o: test/%.cpp 
 	$(CHECKDIR)
-	@echo $@
-	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
+	$(CC) -o$@ -c $(CXXFLAGS) $<
 
 bin/bufferTest: bin/test/bufferTest.o $(obj_buffer)
 	$(BUILDEXE)

@@ -1,7 +1,6 @@
 
 CC = clang++
 CXXFLAGS = -std=c++11 -O3 -Wall -Isrc
-DEPTRACKING=-MD -MF $(@:.o=.d)
 CHECKDIR=@mkdir -p $(dir $@)
 
 BUILDEXE=$(CC) -o$@ $(CXXFLAGS) $^

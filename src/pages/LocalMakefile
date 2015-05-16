@@ -1,6 +1,5 @@
 bin/pages/%.o: src/pages/%.cpp 
 	$(CHECKDIR)
-	@echo $@
-	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
+	$(CC) -o$@ -c $(CXXFLAGS) $<
 
 obj_pages:=bin/pages/Record.o bin/pages/SlottedPage.o bin/pages/TID.o

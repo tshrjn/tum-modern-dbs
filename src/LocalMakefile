@@ -1,7 +1,6 @@
 bin/%.o: src/%.cpp 
 	$(CHECKDIR)
-	@echo $@
-	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
+	$(CC) -o$@ -c $(CXXFLAGS) $<
 
 include src/sort/LocalMakefile
 include src/buffer/LocalMakefile
