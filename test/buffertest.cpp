@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <pthread.h>
 
-#include "../src/buffer/BufferManager.hpp"
+#include "buffer/BufferManager.hpp"
 
 using namespace std;
 

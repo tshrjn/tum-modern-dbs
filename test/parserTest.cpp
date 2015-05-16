@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
-#include "Parser.hpp"
-#include "Schema.hpp"
+#include "schema/Parser.hpp"
+#include "schema/Schema.hpp"
 
 int main(int argc, char* argv[]) {
    if (argc != 2) {

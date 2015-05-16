@@ -5,7 +5,7 @@
 #include <deque>
 #include <mutex>
 
-#include "BufferFrame.hpp"
+#include "buffer/BufferFrame.hpp"
 
 class BufferManager
 {

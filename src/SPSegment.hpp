@@ -1,9 +1,9 @@
 #ifndef SPSEGMENT_HPP
 #define SPSEGMENT_HPP
 
-#include "Record.hpp"
-#include "TID.hpp"
-#include "Segment.hpp"
+#include "pages/Record.hpp"
+#include "pages/TID.cpp"
+#include "Segment.cpp"
 
 class SPSegment : Segment {
 public:
@@ -25,7 +25,7 @@ public:
         size_t fragmentedSpace;
 
 
-        Header() : slotCount(0), dataOffset(blockSize), fragmentedSpace(blockSize-sizeof(Header)) {}
+        Header() : slotCount(0), dataOffset(BufferFrame::frameSize), fragmentedSpace(BufferFrame::frameSize-sizeof(Header)) {}
     };
 
     struct Slot {
@@ -54,22 +54,22 @@ public:
      * Note: This can be implemented much more efficiently with a free space bitmap
      * as described in chapter 3, slide 3, but you are not required to do this.
      */
-    TID SPSegment::insert(const Record& r);
+    TID insert(const Record& r);
 
     /*
      * Deletes the record pointed to by tid and updates the page header accordingly.
      */
-    bool SPSegment::remove(TID tid);
+    bool remove(TID tid);
 
     /*
      * Returns the read-only record (cf. Record.hpp on the website) associated with TID tid.
      */
-    Record SPSegment::lookup(TID tid);
+    Record lookup(TID tid);
 
     /*
      * Updates the record pointed to by tid with the content of record r.
      */
-    bool SPSegment::update(TID tid, const Record& r);
+    bool update(TID tid, const Record& r);
 
 };
 

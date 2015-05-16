@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <string>
-#include "Types.hpp"
+#include "schema/Types.cpp"
 
 #include <iostream>
 #include <string>

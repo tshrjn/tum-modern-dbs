@@ -6,7 +6,7 @@
 #include <memory>
 #include <fstream>
 #include <sstream>
-#include "Schema.hpp"
+#include "schema/Schema.hpp"
 #include <sstream>
 
 class ParserError : std::exception {

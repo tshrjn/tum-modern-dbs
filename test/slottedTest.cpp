@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -5,18 +6,22 @@
 #include <cassert>
 #include <string.h>
 
-#include "DBMS.hpp" // include your stuff here
-#include "Record.hpp"
+#include <unordered_map>
+
+// #include "DBMS.hpp" // include your stuff here
+#include "buffer/BufferManager.hpp"
+#include "SPSegment.hpp"
+
 
 using namespace std;
 
-// todo: adapt to your implementation
+// @TODO: adapt to your implementation
 uint64_t extractPage(TID tid) {
-   return tid >> 16;
+   return 42;
 }
 
 const unsigned initialSize = 100; // in (slotted) pages
-const unsigned totalSize = initialSize+50; // in (slotted) pages
+// const unsigned totalSize = initialSize+50; // in (slotted) pages
 const unsigned maxInserts = 1000ul*1000ul;
 const unsigned maxDeletes = 10ul*1000ul;
 const unsigned maxUpdates = 10ul*1000ul;
@@ -53,8 +58,8 @@ int main(int argc, char** argv) {
 
    // Setting everything
    BufferManager bm(100);
-   // TODO ...
-   SPSegment& sp = 
+   // @TODO ...
+   SPSegment sp(bm, 1);
    Random64 rnd;
 
    // Insert some records

@@ -1,0 +1,6 @@
+bin/buffer/%.o: src/buffer/%.cpp 
+	$(CHECKDIR)
+	@echo $@
+	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
+
+obj_buffer:=bin/buffer/BufferFrame.o bin/buffer/BufferManager.o

@@ -1,0 +1,10 @@
+bin/%.o: src/%.cpp 
+	@echo $@
+	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
+
+include src/sort/LocalMakefile
+include src/buffer/LocalMakefile
+include src/schema/LocalMakefile
+include src/pages/LocalMakefile
+
+obj_segment:=bin/SchemaSegment.o bin/Segment.o bin/SPSegment.o

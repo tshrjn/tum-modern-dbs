@@ -7,8 +7,6 @@
 #include <sys/types.h>
 #include <pthread.h>
 
-const size_t blockSize = 4 * 4096;
-
 enum FrameState
 {
     empty, // data not loaded yet
@@ -43,6 +41,8 @@ private:
    
 
 public:
+    static const size_t frameSize = 4 * 4096;
+
     BufferFrame(int segmentFd, uint64_t pageID);
     ~BufferFrame();
 

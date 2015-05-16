@@ -1,7 +1,7 @@
 #ifndef SCHEMASEGMENT_HPP
 #define SCHEMASEGMENT_HPP
 #include <memory>
-#include "Segment.hpp"
+#include "Segment.cpp"
 #include "buffer/BufferManager.hpp"
 #include "schema/Schema.hpp"
 

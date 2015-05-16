@@ -1,4 +1,4 @@
-#include "externalSort.hpp"
+#include "ExternalSort.hpp"
 #include <cmath>
 #include <iostream>
 #include <algorithm>

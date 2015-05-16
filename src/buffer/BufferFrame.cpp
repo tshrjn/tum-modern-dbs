@@ -1,4 +1,4 @@
-#include "BufferFrame.hpp"
+#include "buffer/BufferFrame.hpp"
 #include <unistd.h>
 #include <stdexcept>
 #include <cstring>
@@ -15,7 +15,7 @@ BufferFrame::BufferFrame(int segmentFd, uint64_t pageID)
     data = nullptr;
     state = FrameState::empty;
     actualPageID = pageID & ((1L << 48)-1);
-    pageOffsetInFile = actualPageID * blockSize;
+    pageOffsetInFile = actualPageID * frameSize;
     std::cout << "Frame.init: page= " << pageID << " offset=" << pageOffsetInFile << std::endl;
 }
 
@@ -45,9 +45,9 @@ void* BufferFrame::getData()
 void BufferFrame::readPage()
 {
     std::cout << "Frame.read: Read data of page " << pageID << std::endl;
-    data = malloc(blockSize);
+    data = malloc(frameSize);
     // We do not need to check if the byte count is ok
-	pread(segmentFd, data, blockSize, pageOffsetInFile);
+	pread(segmentFd, data, frameSize, pageOffsetInFile);
     state = FrameState::clean;
 }
 
@@ -55,7 +55,7 @@ void BufferFrame::readPage()
 void BufferFrame::writePage()
 {
     std::cout << "Frame.write: Write data of page " << pageID << std::endl;
-    pwrite(segmentFd, data, blockSize, pageOffsetInFile);
+    pwrite(segmentFd, data, frameSize, pageOffsetInFile);
     state = FrameState::clean;
 }
 

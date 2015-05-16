@@ -1,10 +1,10 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include "../src/buffer/BufferManager.hpp"
-#include "../src/schema/Parser.hpp"
-#include "../src/schema/Schema.hpp"
-#include "../src/SchemaSegment.hpp"
+#include "buffer/BufferManager.hpp"
+#include "schema/Parser.hpp"
+#include "schema/Schema.hpp"
+#include "SchemaSegment.hpp"
 
 using namespace std;
 

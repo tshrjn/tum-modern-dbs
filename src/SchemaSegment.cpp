@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "schema/Types.hpp"
+#include "schema/Types.cpp"
 
 
 SchemaSegment::SchemaSegment(BufferManager& bufferManager, uint64_t id, std::unique_ptr<Schema> schema)

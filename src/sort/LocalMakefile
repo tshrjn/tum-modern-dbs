@@ -1,0 +1,7 @@
+bin/sort/%.o: src/sort/%.cpp 
+	$(CHECKDIR)
+	@echo $@
+	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
+
+
+obj_sort:=bin/sort/ExternalSort.o
