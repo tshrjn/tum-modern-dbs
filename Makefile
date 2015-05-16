@@ -39,13 +39,13 @@ bin/test/%.o: test/%.cpp
 	$(CC) -o$@ -c $(CXXFLAGS) $<
 
 bin/bufferTest: bin/test/bufferTest.o $(obj_buffer)
-	$(BUILDEXE)
+	$(BUILDEXE) -pthread
 bin/parserTest: bin/test/parserTest.o $(obj_schema)
 	$(BUILDEXE)
 bin/schemaTest: bin/test/schemaTest.o $(obj_buffer) $(obj_schema) $(obj_segment)
-	$(BUILDEXE)
+	$(BUILDEXE) -pthread
 bin/slottedTest: bin/test/slottedTest.o $(obj_buffer) $(obj_schema) $(obj_pages) $(obj_segment)
-	$(BUILDEXE)
+	$(BUILDEXE) -pthread
 
 clean:
 	find bin -name '*.d' -delete -o -name '*.o' -delete -o '(' -perm -u=x '!' -type d ')' -delete

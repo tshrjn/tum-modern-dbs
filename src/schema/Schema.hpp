@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <memory>
 
 struct Schema {
    struct Relation {
