@@ -1,4 +1,5 @@
 bin/%.o: src/%.cpp 
+	$(CHECKDIR)
 	@echo $@
 	$(CC) -o$@ -c $(CXXFLAGS) $(DEPTRACKING) $<
 
