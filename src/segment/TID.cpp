@@ -5,13 +5,15 @@
 #include <functional>
 
 struct TID {
-    //uint48_t pageID;
-    uint32_t pageID;
-    uint16_t slotID;
+    uint32_t page;
+    char __padding[2];
+    uint16_t slot;
 
     bool operator== (const TID& other) const {
-        return pageID == other.pageID && slotID == other.slotID;
+        return page == other.page && slot == other.slot;
     }
+
+    TID(uint32_t page, uint16_t slot) : page(page), slot(slot) {}
 };
 
 
@@ -21,9 +23,9 @@ namespace std {
   {
     std::size_t operator()(const TID &val) const
     {
-		uint64_t c = val.pageID;
+		uint64_t c = val.page;
 		c = c << 16;
-		c += val.slotID;
+		c += val.slot;
 		return std::hash<uint64_t>()(c);
     }
   };

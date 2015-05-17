@@ -1,4 +1,4 @@
-#include "pages/Record.hpp"
+#include "segment/Record.hpp"
 
 Record::Record(Record&& t) : len(t.len), data(t.data) {
    t.data = nullptr;

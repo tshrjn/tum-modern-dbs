@@ -1,0 +1,12 @@
+bin/pages/%.o: src/pages/%.cpp 
+	$(CHECKDIR)
+	$(CC) -o$@ -c $(CXXFLAGS) $<
+
+obj_segment:= \
+	bin/segment/Record.o \
+	bin/segment/SlottedPage.o \
+	bin/segment/TID.o \
+	bin/segment/SPSegment.o \
+	bin/segment/SchemaSegment.o \
+	bin/segment/Segment.o \
+	bin/segment/SPSegment.o

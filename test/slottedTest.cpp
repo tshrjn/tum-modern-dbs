@@ -5,19 +5,17 @@
 #include <cstdint>
 #include <cassert>
 #include <string.h>
-
 #include <unordered_map>
 
-// #include "DBMS.hpp" // include your stuff here
 #include "buffer/BufferManager.hpp"
-#include "SPSegment.hpp"
+#include "segment/SPSegment.hpp"
 
 
 using namespace std;
 
-// @TODO: adapt to your implementation
+// Viktor: adapt to your implementation
 uint64_t extractPage(TID tid) {
-   return 42;
+   return tid.page;
 }
 
 const unsigned initialSize = 100; // in (slotted) pages

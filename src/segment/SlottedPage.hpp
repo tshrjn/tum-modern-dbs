@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstdint>
 #include "buffer/BufferFrame.hpp"
-#include "pages/TID.cpp"
+#include "segment/TID.cpp"
 
 #include <iostream>
 

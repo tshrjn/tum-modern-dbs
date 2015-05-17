@@ -5,12 +5,11 @@
 #include <cstdint>
 #include <cassert>
 #include <string.h>
-
 #include <unordered_map>
 
-// #include "DBMS.hpp" // include your stuff here
 #include "buffer/BufferManager.hpp"
-#include "pages/SlottedPage.hpp"
+#include "segment/SlottedPage.hpp"
+#include "segment/TID.cpp"
 
 using namespace std;
 

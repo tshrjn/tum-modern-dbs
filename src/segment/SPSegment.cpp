@@ -1,4 +1,4 @@
-#include "SPSegment.hpp"
+#include "segment/SPSegment.hpp"
 
 
 TID SPSegment::insert(const Record& r)

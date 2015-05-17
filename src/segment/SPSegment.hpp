@@ -1,47 +1,12 @@
 #ifndef SPSEGMENT_HPP
 #define SPSEGMENT_HPP
 
-#include "pages/Record.hpp"
-#include "pages/TID.cpp"
-#include "Segment.cpp"
+#include "segment/Record.hpp"
+#include "segment/TID.cpp"
+#include "segment/Segment.cpp"
 
 class SPSegment : Segment {
 public:
-    struct Header {
-
-        /*
-         * Number of currently used slots.
-         */
-        uint32_t slotCount;
-
-        /*
-         * Current offset of the first data block from the beginning of the page.
-         */
-        off_t dataOffset;
-
-        /*
-         * Fragmented space that can potentially be used after compaction.
-         */
-        size_t fragmentedSpace;
-
-
-        Header() : slotCount(0), dataOffset(BufferFrame::frameSize), fragmentedSpace(BufferFrame::frameSize-sizeof(Header)) {}
-    };
-
-    struct Slot {
-        /*
-         * Offset of the start of the data item from the beginning of the segment.
-         */
-        uint16_t offset;
-
-        /*
-         * Length of the data item.
-         */
-        uint16_t length;
-
-        Slot() : offset(0), length(0) {}
-    };
-
     /*
      * Constructor is given a reference to the buffer manager and a segment id.
      */

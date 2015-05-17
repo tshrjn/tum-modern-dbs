@@ -1,4 +1,4 @@
-#include "pages/SlottedPage.hpp"
+#include "segment/SlottedPage.hpp"
 #include <assert.h>
 #include <queue>
 

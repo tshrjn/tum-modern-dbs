@@ -4,7 +4,7 @@
 #include "buffer/BufferManager.hpp"
 #include "schema/Parser.hpp"
 #include "schema/Schema.hpp"
-#include "SchemaSegment.hpp"
+#include "segment/SchemaSegment.hpp"
 
 using namespace std;
 

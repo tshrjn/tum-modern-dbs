@@ -1,4 +1,4 @@
-#include "SchemaSegment.hpp"
+#include "segment/SchemaSegment.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>
