@@ -58,9 +58,6 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
             locked = frame->lockRead(false);
         }
 
-        // Unlock the BufferManager
-        mtx.unlock();
-
         // If we could not lock it directly we wait for the unlock
         if (!locked) {
             if (exclusive) {
@@ -72,6 +69,10 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 					<< std::endl;
                 locked = frame->lockRead(true);
             }
+
+            // Unlock the BufferManager inside lock
+            // @TODO: do this earlier - race conditions! 
+            mtx.unlock();
         }
     } else {
 		std::cout << "BufferManager.fix: Requested PageID " << pageID \
@@ -126,6 +127,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         }
 
         // Unlock BufferManager
+        // @TODO: do this earlier - race conditions! 
         mtx.unlock();
     }
     return *frame;

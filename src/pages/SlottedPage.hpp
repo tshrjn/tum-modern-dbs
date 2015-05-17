@@ -3,45 +3,92 @@
 
 #include <cstdio>
 #include <cstdint>
+#include "buffer/BufferFrame.hpp"
+#include "pages/TID.cpp"
 
-#include <buffer/BufferFrame.hpp>
+#include <iostream>
 
-// Single slot that stores the offset inside the single page and the length
-struct Slot {
-	uint32_t offset;
-	uint32_t length;
-};
+// Struct to hold a whole slottedPage
+struct SlottedPage {
 
-// Based on chapter 3 page 9
-struct Header {
+// typedefs
+private:
+	// Based on chapter 3 page 9
+	// 64 bit for header
+	typedef struct {
 		// Number of currently used slots.
-	    uint32_t slotCount;
+	    uint16_t numberSlots;
 
 	    // To speed up the search for a free slot
-	    uint32_t firstFreeSlot;
+	    uint16_t firstFreeSlot;
 
 	    // Lower end of the data
 	    // We use a union structure for slots && data therefore
 	    // data[dataStart] points to the first data byte
-	    size_t dataStart;
+	    uint16_t dataStart;
 
-	    // Space that would be available after compactification
-	    size_t freeSpace;
-};
+	    // Additional space that would be available after compactification
+	    uint16_t freeFragments;
+	} Header;
 
-// Struct to hold a whole slottedPage
-struct SlottedPage {
-	static const size_t pageSize = BufferFrame::frameSize;
-	static const size_t headerSize = sizeof(Header);
+	// A single slot
+	// 32 bit for slot
+	typedef struct {
+		uint16_t offset;
+		uint16_t length;
 
-public:
-	Header header;
+	public:
+		bool isEmpty() {
+			// The offset can never be dataSize as it is Out of bounds
+			return offset == SlottedPage::dataSize;
+		}
+	} Slot;
 
-	union {
-		Slot slots[(pageSize - headerSize) / sizeof(Slot)];
-		char data[(pageSize - headerSize) / sizeof(Slot)];
+	// Single slot that stores the offset inside the single page and the length
+	class SlotLengthGreater {
+		public:
+	    bool operator()(Slot* s1, Slot* s2) { // Returns true if s1 is smaller than s2
+	    	std::cout << "SlotLengthGreater.(): compared " << s1->length << " " << s2->length << std::endl;
+	    	return s1->length > s2->length;
+	    }
 	};
+
+// Constants
+public:	
+	static const uint16_t pageSize = BufferFrame::frameSize;
+	static const uint16_t headerSize = sizeof(Header);
+	static const uint16_t dataSize = pageSize - headerSize;
+
+// Private fields
+private:
+	Header header;
+	union {
+		Slot slots[SlottedPage::dataSize / sizeof(Slot)];
+		char data[SlottedPage::dataSize];
+	};
+
+// Methods && Constructors
+public:
+	SlottedPage();
+	~SlottedPage();
+
+	// Return the space that is available without compactification
+	uint16_t getCurrentFreeSpace();
+
+	// Return the space that is available with compactification
+	uint16_t getCompactedFreeSpace();
+
+	// Check if the data can be stored in the page
+	bool canAllocateSlot(uint16_t data);
+
+	// Store data in page and return the slot id
+	// Assert (canAllocateSlot(data))
+	uint16_t allocateSlot(uint16_t data);
+
+	// Stores the data in the given slotId
+	void storeData(uint16_t slotId, char *data);
+
+	// Find next free slot
+	void updateFirstSlot();
 };
-
-
 #endif
