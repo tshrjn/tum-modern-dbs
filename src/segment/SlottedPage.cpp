@@ -1,6 +1,7 @@
 #include "segment/SlottedPage.hpp"
 #include <assert.h>
 #include <queue>
+#include <math.h>
 
 SlottedPage::SlottedPage() {
 	header.numberSlots = 0;
@@ -143,4 +144,13 @@ void SlottedPage::updateFirstSlot() {
 	// extend the array by one
 	header.numberSlots++;
 	header.firstFreeSlot = newFirst;
+}
+
+char SlottedPage::getFreeSpaceNibble(bool upper) {
+	unsigned free = (log(getCompactedFreeSpace()) / log(SlottedPage::dataSize)) * pow(2,4);
+	char freeBitmap = (char) (free & 0xF);
+	if(upper) {
+		freeBitmap = freeBitmap << 4;
+	}
+	return freeBitmap;
 }

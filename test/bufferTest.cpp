@@ -32,7 +32,7 @@ static void* scan(void *arg) {
    while (!stop) {
       unsigned start = random()%(pagesOnDisk-10);
       for (unsigned page=start; page<start+10; page++) {
-         BufferFrame& bf = bm->fixPage(page, false);
+         BufferFrame& bf = bm->fixPage(PID(page), false);
          unsigned newcount = reinterpret_cast<unsigned*>(bf.getData())[0];
          assert(counters[page]<=newcount);
          counters[page]=newcount;
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
 
    // set all counters to 0
    for (unsigned i=0; i<pagesOnDisk; i++) {
-      BufferFrame& bf = bm->fixPage(i, true);
+      BufferFrame& bf = bm->fixPage(PID(i), true);
       reinterpret_cast<unsigned*>(bf.getData())[0]=0;
       bm->unfixPage(bf, true);
    }

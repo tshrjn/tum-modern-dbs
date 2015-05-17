@@ -6,6 +6,7 @@
 
 #include <sys/types.h>
 #include <pthread.h>
+#include "buffer/PID.cpp"
 
 enum FrameState
 {
@@ -17,10 +18,11 @@ enum FrameState
 class BufferFrame
 {
 private:
-    // File descriptor of the segment
+    PID pageID;
+
+    // file descriptor of segment
     int segmentFd;
-    uint64_t pageID;
-    uint64_t actualPageID;
+
     // (start) position of the page in the segment file
     off_t pageOffsetInFile;
 
@@ -43,7 +45,7 @@ private:
 public:
     static const size_t frameSize = 4 * 4096;
 
-    BufferFrame(int segmentFd, uint64_t pageID);
+    BufferFrame(PID pageID, int segmentFd);
     ~BufferFrame();
 
     // Give access to the content of the buffered page
@@ -53,7 +55,7 @@ public:
 
     void setDirty();
 
-	uint64_t getPageID() {
+	PID getPageID() {
 		return pageID;
 	}
 

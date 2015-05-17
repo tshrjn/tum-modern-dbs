@@ -109,5 +109,9 @@ public:
 
 	// Find next free slot
 	void updateFirstSlot();
+
+	// Chapter 3 page 3
+	// The lower 4 bits of the returned byte represent the logarithmic free space of the page
+	char getFreeSpaceNibble(bool upper);
 };
 #endif

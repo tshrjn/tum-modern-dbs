@@ -34,7 +34,7 @@ BufferManager::~BufferManager()
  * If the page is accessed exclusively the write lock is acquired and all readers are blocked
  * If the page is not accessed exclusively the read lock is acquired
  */
-BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
+BufferFrame& BufferManager::fixPage(PID pageID, bool exclusive) {
 	std::cout << "BufferManager.fix" << std::endl;
 
     BufferFrame *frame = nullptr;
@@ -46,7 +46,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
     // Check if page is already in buffer, then just return existing frame (with rwlock)
     auto entry = bufferFrameMap.find(pageID);
     if (entry != bufferFrameMap.end()) {
-		std::cout << "BufferManager.fix: Requested PageID " << pageID << " is already in Buffer" << std::endl;
+		std::cout << "BufferManager.fix: Requested PageID " << (std::string) pageID << " is already in Buffer" << std::endl;
 
         frame = entry->second;
 
@@ -57,6 +57,10 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
         } else {
             locked = frame->lockRead(false);
         }
+
+         // Unlock the BufferManager inside lock
+        // @TODO: do this earlier - race conditions! 
+        mtx.unlock();
 
         // If we could not lock it directly we wait for the unlock
         if (!locked) {
@@ -69,13 +73,9 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 					<< std::endl;
                 locked = frame->lockRead(true);
             }
-
-            // Unlock the BufferManager inside lock
-            // @TODO: do this earlier - race conditions! 
-            mtx.unlock();
         }
     } else {
-		std::cout << "BufferManager.fix: Requested PageID " << pageID \
+		std::cout << "BufferManager.fix: Requested PageID " << (std::string)  pageID \
 			<< " was not in Buffer" << std::endl;
 
         // Frame could not be found
@@ -92,7 +92,7 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 					replacementCandidate = *it;
 					fifo.erase(it);
 					std::cout << "BufferManager.fix: Found replacement candidate with pageID " \
-						<< replacementCandidate->getPageID() << std::endl;
+						<< (std::string) replacementCandidate->getPageID() << std::endl;
 					break;
 				}
 			}
@@ -110,9 +110,9 @@ BufferFrame& BufferManager::fixPage(uint64_t pageID, bool exclusive) {
 		}
 
         // Create new frame
-        std::cout << "BufferManager.fix: Creating new Frame with pageID: " << pageID << std::endl;
-        int segmentFd = getSegmentFd(pageID >> 48);
-        frame = new BufferFrame(segmentFd, pageID);
+        std::cout << "BufferManager.fix: Creating new Frame with pageID: " << (std::string) pageID << std::endl;
+        int segmentFd = getSegmentFd(pageID.getSegment());
+        frame = new BufferFrame(pageID, segmentFd);
         auto result = bufferFrameMap.insert(std::make_pair(pageID, frame));
         if (!result.second) {
             throw std::runtime_error("BufferManager.fix: Insert to buffer map not successful!");
@@ -145,7 +145,7 @@ void BufferManager::unfixPage(BufferFrame& frame, bool isDirty)
         frame.setDirty();
 	}
     frame.unlock();
-	std::cout << "BufferManager.unfix: Unlocked page " << frame.getPageID() << std::endl;
+	std::cout << "BufferManager.unfix: Unlocked page " << (std::string) frame.getPageID() << std::endl;
 }
 
 /*

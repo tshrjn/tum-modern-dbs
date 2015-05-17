@@ -15,7 +15,7 @@ using namespace std;
 
 // Viktor: adapt to your implementation
 uint64_t extractPage(TID tid) {
-   return tid.page;
+   return tid.getPage();
 }
 
 const unsigned initialSize = 100; // in (slotted) pages

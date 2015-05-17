@@ -25,7 +25,7 @@ SchemaSegment::SchemaSegment(BufferManager& bm, uint64_t id)
 void SchemaSegment::serialize()
 {
     size = 1;
-    BufferFrame& bf = bufferManager.fixPage(id, true);
+    BufferFrame& bf = bufferManager.fixPage(PID(id), true);
     void* dataPtr = bf.getData();
 
     std::string schemaString = schema->serialize();
@@ -40,7 +40,7 @@ void SchemaSegment::serialize()
 void SchemaSegment::deserialize()
 {
     size = 1;
-    BufferFrame& bf = bufferManager.fixPage(id, true);
+    BufferFrame& bf = bufferManager.fixPage(PID(id), true);
     void* dataPtr = bf.getData();
 
     const char *data = static_cast<char *>(dataPtr);

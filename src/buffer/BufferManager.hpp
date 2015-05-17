@@ -6,6 +6,7 @@
 #include <mutex>
 
 #include "buffer/BufferFrame.hpp"
+#include "buffer/PID.cpp"
 
 class BufferManager
 {
@@ -21,7 +22,7 @@ public:
      * The page ID splits into a segment ID and an actual page ID.
      * Each page is stored disk in a file with the same name as its segment ID.
      */
-    BufferFrame& fixPage(uint64_t pageId, bool exclusive);
+    BufferFrame& fixPage(PID pageId, bool exclusive);
 
     /*
      * Return a frame to the buffer manager, indicating if it is dirty or not.
@@ -38,7 +39,7 @@ private:
     std::mutex mtx;
 
     // Hashmap that maps page ids to the corresponding buffer frame
-    std::unordered_map<uint64_t, BufferFrame*> bufferFrameMap;
+    std::unordered_map<PID, BufferFrame*> bufferFrameMap;
 
     // Store file descriptors of opened segment files
     std::unordered_map<uint16_t, int> segmentsFdMap;

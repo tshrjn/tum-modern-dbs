@@ -6,11 +6,13 @@
 #include "segment/Segment.cpp"
 
 class SPSegment : Segment {
+private:
+
 public:
     /*
      * Constructor is given a reference to the buffer manager and a segment id.
      */
-    SPSegment(BufferManager& bm, uint64_t id) : Segment(bufferManager, id) {};
+    SPSegment(BufferManager& bm, uint64_t id) : Segment(bm, id) {};
 
     /*
      * Searches through the segment's pages looking for a page with enough space to store r.
