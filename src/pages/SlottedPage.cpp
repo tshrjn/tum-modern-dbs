@@ -6,7 +6,7 @@ SlottedPage::SlottedPage() {
 	header.numberSlots = 0;
 	header.firstFreeSlot = 0;
 	header.dataOffset = SlottedPage::dataSize;
-	header.freeFragments = 0;
+	header.fragmentedSpace = 0;
 }
 
 SlottedPage::~SlottedPage() {
@@ -21,7 +21,7 @@ uint16_t SlottedPage::getCurrentFreeSpace() {
 
 uint16_t SlottedPage::getCompactedFreeSpace() {
 	auto current = getCurrentFreeSpace();
-	return current + header.freeFragments;
+	return current + header.fragmentedSpace;
 }
 
 bool SlottedPage::canAllocateSlot(uint16_t dataSize) {
@@ -31,11 +31,10 @@ bool SlottedPage::canAllocateSlot(uint16_t dataSize) {
 
 bool SlottedPage::canReallocateSlot(uint16_t slotId, uint16_t dataSize) {
 	auto requiredSpace = dataSize;
-	return getCompactedFreeSpace() - slots[slotId].length >= requiredSpace;
+	return getCompactedFreeSpace() + slots[slotId].length >= requiredSpace;
 }
 
 void SlottedPage::compactify() {
-	std::cout << "SlottedPage.allocateSlot: compactifying the data" << std::endl;
 	// order the slots with a priority queue (length descending)
 	std::priority_queue<Slot*, std::vector<Slot*>, SlotLengthGreater> q;
 	for(int i = 0; i < header.numberSlots; i++) {
@@ -51,8 +50,9 @@ void SlottedPage::compactify() {
 	while(!q.empty()) {
 		Slot *slotPtr = q.top();
 		q.pop();
-		cacheDataOffset -= slotPtr -> length;
-		memcpy(cache + cacheDataOffset, data + slotPtr->offset, slotPtr -> length);
+		auto length = slotPtr -> length;
+		cacheDataOffset -= length;
+		memcpy(cache + cacheDataOffset, data + slotPtr->offset, length);
 
 		// store the new offset in the slot.
 		// (length stays of course the same)
@@ -60,16 +60,15 @@ void SlottedPage::compactify() {
 	}
 
 	// now store the compactified data in the page
-	std::cout << "SlottedPage.allocateSlot: writing sorted data back" << std::endl;
-	memcpy(data + cacheDataOffset, cache + cacheDataOffset, header.dataOffset - cacheDataOffset);
-	header.freeFragments = 0;
+	memcpy(data + cacheDataOffset, cache + cacheDataOffset, SlottedPage::dataSize - cacheDataOffset);
+	header.fragmentedSpace = 0;
 	header.dataOffset = cacheDataOffset;
 }
 
 uint16_t SlottedPage::allocateSlot(uint16_t dataSize) {
 	assert(canAllocateSlot(dataSize));
 
-	// compactify if needed
+	// compactify if needed 
 	if(getCurrentFreeSpace() < dataSize) {
 		compactify();
 	}
@@ -89,7 +88,18 @@ uint16_t SlottedPage::allocateSlot(uint16_t dataSize) {
 }
 
 void SlottedPage::removeSlot(uint16_t slotId) {
-	slots[slotId] = { .offset = SlottedPage::dataSize, .length = 0 };
+	// if it is the first data block we can just increase the dataOffset
+	if(slots[slotId].offset == header.dataOffset) {
+		header.dataOffset += slots[slotId].length;
+	} else { // otherwise increase fragmented space
+		header.fragmentedSpace += slots[slotId].length;
+	}
+	// delete slot
+	slots[slotId].setEmpty();
+	// update first free slot
+	if(slotId < header.firstFreeSlot) {
+		header.firstFreeSlot = slotId;
+	}
 }
 
 void SlottedPage::reallocateSlot(uint16_t slotId, uint16_t newDataSize) {
@@ -99,7 +109,7 @@ void SlottedPage::reallocateSlot(uint16_t slotId, uint16_t newDataSize) {
 
 	// Compactify if the data cant be appended in front
 	if(getCurrentFreeSpace() < newDataSize) {
-		removeSlot(slotId);
+		slots[slotId].setEmpty();
 		compactify();
 	}
 
@@ -127,6 +137,7 @@ void SlottedPage::updateFirstSlot() {
 			header.firstFreeSlot = newFirst;
 			return;
 		}
+		newFirst++;
 	}
 	// when the while loop finishes newFirst points to the first byte after the original array
 	// extend the array by one

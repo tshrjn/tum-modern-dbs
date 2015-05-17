@@ -28,7 +28,7 @@ private:
 	    uint16_t dataOffset;
 
 	    // Additional space that would be available after compactification
-	    uint16_t freeFragments;
+	    uint16_t fragmentedSpace;
 	} Header;
 
 	// A single slot
@@ -42,13 +42,17 @@ private:
 			// The offset can never be dataSize as it is Out of bounds
 			return offset == SlottedPage::dataSize;
 		}
+
+		void setEmpty() {
+			offset = SlottedPage::dataSize;
+			length = 0;
+		}
 	} Slot;
 
 	// Single slot that stores the offset inside the single page and the length
 	class SlotLengthGreater {
 		public:
 	    bool operator()(Slot* s1, Slot* s2) { // Returns true if s1 is smaller than s2
-	    	std::cout << "SlotLengthGreater.(): compared " << s1->length << " " << s2->length << std::endl;
 	    	return s1->length > s2->length;
 	    }
 	};
@@ -57,6 +61,7 @@ private:
 public:	
 	static const uint16_t pageSize = BufferFrame::frameSize;
 	static const uint16_t headerSize = sizeof(Header);
+	static const uint16_t slotSize = sizeof(Slot);
 	static const uint16_t dataSize = pageSize - headerSize;
 
 // Private fields
