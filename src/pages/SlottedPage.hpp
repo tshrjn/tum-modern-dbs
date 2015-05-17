@@ -24,8 +24,8 @@ private:
 
 	    // Lower end of the data
 	    // We use a union structure for slots && data therefore
-	    // data[dataStart] points to the first data byte
-	    uint16_t dataStart;
+	    // data[dataOffset] points to the first data byte
+	    uint16_t dataOffset;
 
 	    // Additional space that would be available after compactification
 	    uint16_t freeFragments;
@@ -67,6 +67,10 @@ private:
 		char data[SlottedPage::dataSize];
 	};
 
+	// compactify the data and remove empty fragments
+	void compactify();
+
+
 // Methods && Constructors
 public:
 	SlottedPage();
@@ -79,14 +83,24 @@ public:
 	uint16_t getCompactedFreeSpace();
 
 	// Check if the data can be stored in the page
-	bool canAllocateSlot(uint16_t data);
+	bool canAllocateSlot(uint16_t dataSize);
+
+	// Check if the slot can be reallocated without a new TID reference on the same page
+	bool canReallocateSlot(uint16_t slotId, uint16_t dataSize);
 
 	// Store data in page and return the slot id
 	// Assert (canAllocateSlot(data))
-	uint16_t allocateSlot(uint16_t data);
+	uint16_t allocateSlot(uint16_t dataSize);
+
+	// Shrink/Enlarge the slot on the same page (without TID redirect)
+	// Assert (canReallocateSlot(slotId, dataSize))
+	void reallocateSlot(uint16_t slotId, uint16_t dataSize);
 
 	// Stores the data in the given slotId
 	void storeData(uint16_t slotId, char *data);
+
+	// Remove the slot
+	void removeSlot(uint16_t slotId);
 
 	// Find next free slot
 	void updateFirstSlot();
