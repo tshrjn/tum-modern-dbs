@@ -1,9 +1,8 @@
 #include "segment/SPSegment.hpp"
 
 
-TID SPSegment::insert(const Record& r)
-{
-
+TID SPSegment::insert(const Record& r) {
+	bufferManager.fixPage(PID(segmentId,0), true);
 }
 
 bool SPSegment::remove(TID tid)

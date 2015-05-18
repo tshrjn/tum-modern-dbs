@@ -146,9 +146,10 @@ void SlottedPage::updateFirstSlot() {
 	header.firstFreeSlot = newFirst;
 }
 
+// (not used at the moment)
 char SlottedPage::getFreeSpaceNibble(bool upper) {
-	unsigned free = (log(getCompactedFreeSpace()) / log(SlottedPage::dataSize)) * pow(2,4);
-	char freeBitmap = (char) (free & 0xF);
+	unsigned free = (unsigned)((log(getCompactedFreeSpace()) / log(SlottedPage::dataSize)) * pow(2,4));
+	char freeBitmap = (char) (free & 0x0F);
 	if(upper) {
 		freeBitmap = freeBitmap << 4;
 	}

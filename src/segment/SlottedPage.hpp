@@ -113,6 +113,7 @@ public:
 
 	// Chapter 3 page 3
 	// The lower 4 bits of the returned byte represent the logarithmic free space of the page
+	// (not used at the moment)
 	char getFreeSpaceNibble(bool upper);
 };
 #endif
