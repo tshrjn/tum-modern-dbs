@@ -9,7 +9,7 @@ TID SPSegment::insert(const Record& r) {
 		// first just check if there is enough space
 		// @TODO: exclusive lock on every page lookup might be super slow
 		auto frame = bufferManager.fixPage(PID(segmentId,i), true);
-		SlottedPage* page = static_cast<SlottedPage*>(frame.getData());
+		SlottedPage* page = static_cast<SlottedPage*>(frame->getData());
 
 		if(page->canAllocateSlot(recordSize)) {
 			auto slotId = page->allocateSlot(recordSize);
@@ -30,7 +30,7 @@ TID SPSegment::insert(const Record& r) {
 
 	// we need to create a new slottedPage
 	auto frame = bufferManager.fixPage(PID(segmentId,numberPages++), true);
-	auto dataPtr = frame.getData();
+	auto dataPtr = frame->getData();
 	memcpy(dataPtr, new SlottedPage(), BufferFrame::frameSize);
 	SlottedPage* page = static_cast<SlottedPage*>(dataPtr);
 
@@ -49,7 +49,7 @@ bool SPSegment::remove(TID tid) {
 	auto pageId = tid.getPage();
 	auto slotId = tid.getSlot();
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), true);
-	SlottedPage* page = static_cast<SlottedPage*>(frame.getData());
+	SlottedPage* page = static_cast<SlottedPage*>(frame->getData());
 	page->removeSlot(slotId);
 	bufferManager.unfixPage(frame, true);
 	return true;
@@ -61,7 +61,7 @@ Record& SPSegment::lookup(TID tid) {
 	auto pageId = tid.getPage();
 	auto slotId = tid.getSlot();
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), false);
-	SlottedPage* page = (SlottedPage*) frame.getData();
+	SlottedPage* page = (SlottedPage*) frame->getData();
 	Record* record = (Record*) page->getData(slotId);
 	return *record;
 }
@@ -72,7 +72,7 @@ bool SPSegment::update(TID tid, const Record& r) {
 	auto pageId = tid.getPage();
 	auto slotId = tid.getSlot();
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), true);
-	SlottedPage* page = (SlottedPage*) frame.getData();
+	SlottedPage* page = (SlottedPage*) frame->getData();
 	Record* oldRecordPtr = (Record*) page->getData(slotId);
 
 	// first get old and check if the size is the same

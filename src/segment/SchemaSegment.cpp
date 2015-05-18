@@ -25,9 +25,9 @@ void SchemaSegment::serialize()
 
     // fix first buffer frame to store the number of schema-pages
     // @TODO: would be nicer to store the number of schema-bytes and derive the number of pages
-    BufferFrame& bf = bufferManager.fixPage(PID(segmentId,0), true);
-    char *bfData = static_cast<char *>(bf.getData());
-    framePtrs.insert(&bf);
+    BufferFrame* bf = bufferManager.fixPage(PID(segmentId,0), true);
+    char *bfData = static_cast<char *>(bf->getData());
+    framePtrs.insert(bf);
 
     // serialize the schema and get a pointer to a byte array
     std::string schemaString = schema->serialize();
@@ -52,16 +52,16 @@ void SchemaSegment::serialize()
 
     // create additional buffer frames
     for(int i = 0; i < additionalSchemaPages; i++) {
-        BufferFrame& nf = bufferManager.fixPage(PID(segmentId, i+1), true);
-        char *nd = static_cast<char *>(nf.getData());
+        BufferFrame* nf = bufferManager.fixPage(PID(segmentId, i+1), true);
+        char *nd = static_cast<char *>(nf->getData());
         memcpy(nd, data + posBuffer, BufferFrame::frameSize);
         posBuffer += BufferFrame::frameSize;
-        framePtrs.insert(&nf);
+        framePtrs.insert(nf);
     }
 
     // unfix all pages
     for(const auto& framePtr: framePtrs) {
-        bufferManager.unfixPage(*framePtr, true);
+        bufferManager.unfixPage(framePtr, true);
     }
 }
 
@@ -69,11 +69,11 @@ void SchemaSegment::deserialize()
 {
     // first load the first page to get the number of pages that we need to read
     std::unordered_set<BufferFrame*> framePtrs;
-    BufferFrame& bf = bufferManager.fixPage(PID(segmentId,0), false);
-    framePtrs.insert(&bf);
+    BufferFrame* bf = bufferManager.fixPage(PID(segmentId,0), false);
+    framePtrs.insert(bf);
 
     // in the first uint64_t of page 0 we store the number of additional pages (excluding 0) that we need to load
-    const char *data = static_cast<char *>(bf.getData());
+    const char *data = static_cast<char *>(bf->getData());
     uint64_t additionalSchemaPages = static_cast<uint64_t> (*data);
     auto schemaLength = (additionalSchemaPages + 1) * BufferFrame::frameSize - sizeof(uint64_t); 
     char buffer[schemaLength];
@@ -84,11 +84,11 @@ void SchemaSegment::deserialize()
 
     // iteratively copy all other data
     for(int i = 0; i < additionalSchemaPages; i++) {
-        BufferFrame& nf = bufferManager.fixPage(PID(segmentId,i+1), false);
-        const char *nd = static_cast<char *>(nf.getData());
+        BufferFrame* nf = bufferManager.fixPage(PID(segmentId,i+1), false);
+        const char *nd = static_cast<char *>(nf->getData());
         memcpy(buffer + posBuffer, nd, BufferFrame::frameSize);
         posBuffer += BufferFrame::frameSize;
-        framePtrs.insert(&nf);
+        framePtrs.insert(nf);
     }
 
     // deserialize with the created buffer
@@ -96,6 +96,6 @@ void SchemaSegment::deserialize()
     
     // unfix all pages
     for(const auto& framePtr: framePtrs) {
-        bufferManager.unfixPage(*framePtr, false);
+        bufferManager.unfixPage(framePtr, false);
     }
 }

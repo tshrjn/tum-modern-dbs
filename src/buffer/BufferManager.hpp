@@ -22,14 +22,14 @@ public:
      * The page ID splits into a segment ID and an actual page ID.
      * Each page is stored disk in a file with the same name as its segment ID.
      */
-    BufferFrame& fixPage(PID pageId, bool exclusive);
+    BufferFrame* fixPage(PID pageId, bool exclusive);
 
     /*
      * Return a frame to the buffer manager, indicating if it is dirty or not.
      * If dirty, the manager must write it back to disk. It doesn't have to write it back
      * immediately, but must write it back before unfixPage is called.
      */
-    void unfixPage(BufferFrame& frame, bool isDirty);
+    void unfixPage(BufferFrame* frame, bool isDirty);
 
     /*
      * Flush all pages

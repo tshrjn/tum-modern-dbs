@@ -17,8 +17,10 @@ BufferManager::BufferManager(size_t pageCount)
 BufferManager::~BufferManager()
 {
     // write dirty pages back to file
-    for (auto& kv: bufferFrameMap)
+    for (auto& kv: bufferFrameMap) {
         kv.second->flush();
+        delete(kv.second);
+    }
     // close all opened file descriptors
     for (auto& kv: segmentsFdMap)
         close(kv.second);
@@ -145,7 +147,7 @@ void BufferManager::unfixPage(BufferFrame* frame, bool isDirty)
         frame->setDirty();
 	}
     frame->unlock();
-	std::cout << "BufferManager.unfix: Unlocked page " << (std::string) frame.getPageID() << std::endl;
+	std::cout << "BufferManager.unfix: Unlocked page " << (std::string) frame->getPageID() << std::endl;
 }
 
 /*
