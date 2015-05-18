@@ -2,7 +2,8 @@
 
 
 TID SPSegment::insert(const Record& r) {
-	auto recordSize = r.getLen() + sizeof(unsigned);
+	auto recordSize = r.getTotalLen();
+	std::cout << "SPSegment.insert: recordSize=" << recordSize << std::endl;
 
 	for(int i = 0; i < numberPages; i++) {
 		// first just check if there is enough space
@@ -12,8 +13,14 @@ TID SPSegment::insert(const Record& r) {
 
 		if(page->canAllocateSlot(recordSize)) {
 			auto slotId = page->allocateSlot(recordSize);
+			// std::cout << "allocated slot " << slotId << " with length " << page->getLength(slotId) << std::endl;
 			page->storeData(slotId, (char *) &r);
+			// std::cout << "stored " << recordSize << std::endl;
+			
 			bufferManager.unfixPage(frame, true);
+			// std::cout << "unfixed" << std::endl;
+
+			std::cout << "SPSegment.insert: Returing TID (" << segmentId << "," << slotId << ")" << std::endl;
 			return TID(i, slotId);
 
 		} else {
@@ -30,12 +37,15 @@ TID SPSegment::insert(const Record& r) {
 	// allocate a slot and store the record
 	auto slotId = page->allocateSlot(recordSize);
 	page->storeData(slotId, (char *) &r);
+	bufferManager.unfixPage(frame, true);
 	
-	// return the new tid
+	std::cout << "SPSegment.insert: Returing TID (" << segmentId << "," << slotId << ") on new Page" << std::endl;
 	return TID(segmentId,slotId);
 }
 
 bool SPSegment::remove(TID tid) {
+	std::cout << "SPSegment.remove" << std::endl;
+
 	auto pageId = tid.getPage();
 	auto slotId = tid.getSlot();
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), true);
@@ -45,8 +55,9 @@ bool SPSegment::remove(TID tid) {
 	return true;
 }
 
-Record& SPSegment::lookup(TID tid)
-{
+Record& SPSegment::lookup(TID tid) {
+	std::cout << "SPSegment.lookup" << std::endl;
+
 	auto pageId = tid.getPage();
 	auto slotId = tid.getSlot();
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), false);
@@ -55,8 +66,9 @@ Record& SPSegment::lookup(TID tid)
 	return *record;
 }
 
-bool SPSegment::update(TID tid, const Record& r)
-{
+bool SPSegment::update(TID tid, const Record& r) {
+	std::cout << "SPSegment.update" << std::endl;
+
 	auto pageId = tid.getPage();
 	auto slotId = tid.getSlot();
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), true);

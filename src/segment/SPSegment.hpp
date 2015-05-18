@@ -5,6 +5,7 @@
 #include "segment/TID.cpp"
 #include "segment/Segment.cpp"
 #include "segment/SlottedPage.hpp"
+#include <iostream>
 
 class SPSegment : Segment {
 private:

@@ -6,7 +6,7 @@
 
 // A simple Record implementation
 class Record {
-   unsigned len;
+   uint16_t len;
    char* data;
 
 public:
@@ -24,6 +24,8 @@ public:
    const char* getData() const;
    // Get data size in bytes
    unsigned getLen() const;
+   // Get total record length
+   unsigned getTotalLen() const { return sizeof(this) - sizeof(char*) + getLen(); }
 };
 
 #endif

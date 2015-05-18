@@ -25,7 +25,7 @@ BufferFrame::~BufferFrame()
 	// The bufferManager should hold the last WriteLock when the destructor is called
 	pthread_rwlock_destroy(&frameLock);
 
-    std::cout << "Frame.destroy: Free data page " << (std::string) pageID << std::endl;
+    std::cout << "Frame.destroy: Release data page " << (std::string) pageID << std::endl;
     if (data != nullptr) {
         free(data);
         data = nullptr;

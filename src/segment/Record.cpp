@@ -10,7 +10,7 @@ Record::Record(unsigned len, const char* const ptr) : len(len) {
    if (data)
       memcpy(data, ptr, len);
 }
-
+  
 const char* Record::getData() const {
    return data;
 }

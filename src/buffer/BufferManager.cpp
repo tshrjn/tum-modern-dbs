@@ -34,8 +34,8 @@ BufferManager::~BufferManager()
  * If the page is accessed exclusively the write lock is acquired and all readers are blocked
  * If the page is not accessed exclusively the read lock is acquired
  */
-BufferFrame& BufferManager::fixPage(PID pageID, bool exclusive) {
-	std::cout << "BufferManager.fix" << std::endl;
+BufferFrame* BufferManager::fixPage(PID pageID, bool exclusive) {
+	// std::cout << "BufferManager.fix" << std::endl;
 
     BufferFrame *frame = nullptr;
 
@@ -130,7 +130,7 @@ BufferFrame& BufferManager::fixPage(PID pageID, bool exclusive) {
         // @TODO: do this earlier - race conditions! 
         mtx.unlock();
     }
-    return *frame;
+    return frame;
 }
 
 /*
@@ -138,13 +138,13 @@ BufferFrame& BufferManager::fixPage(PID pageID, bool exclusive) {
  * If dirty, the manager must write it back to disk. It doesn't have to write it back
  * immediately, but must write it back before unfixPage is called.
  */
-void BufferManager::unfixPage(BufferFrame& frame, bool isDirty)
+void BufferManager::unfixPage(BufferFrame* frame, bool isDirty)
 {
-	std::cout << "BufferManager.unfix" << std::endl;
+	// std::cout << "BufferManager.unfix" << std::endl;
     if (isDirty) {
-        frame.setDirty();
+        frame->setDirty();
 	}
-    frame.unlock();
+    frame->unlock();
 	std::cout << "BufferManager.unfix: Unlocked page " << (std::string) frame.getPageID() << std::endl;
 }
 

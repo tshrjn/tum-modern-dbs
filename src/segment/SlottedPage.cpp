@@ -126,7 +126,9 @@ void SlottedPage::reallocateSlot(uint16_t slotId, uint16_t newDataSize) {
 
 void SlottedPage::storeData(uint16_t slotId, char *newData) {
 	auto first = slots[slotId].offset;
+	// std::cout << "first " << first << std::endl;
 	auto length = slots[slotId].length;
+	// std::cout << "length " << length << std::endl;
 	memcpy(data + first, newData, length);
 }
 
