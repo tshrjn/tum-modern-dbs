@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
       unsigned len = value.size();
 
       // Lookup
-      Record rec = sp.lookup(tid);
+      Record& rec = sp.lookup(tid);
       assert(rec.getLen() == len);
       assert(memcmp(rec.getData(), value.c_str(), len)==0);
 
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
       TID tid = p.first;
       const std::string& value = testData[p.second];
       unsigned len = value.size();
-      Record rec = sp.lookup(tid);
+      Record& rec = sp.lookup(tid);
       assert(rec.getLen() == len);
       assert(memcmp(rec.getData(), value.c_str(), len)==0);
    }

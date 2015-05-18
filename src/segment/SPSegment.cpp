@@ -42,6 +42,7 @@ bool SPSegment::remove(TID tid) {
 	SlottedPage* page = static_cast<SlottedPage*>(frame.getData());
 	page->removeSlot(slotId);
 	bufferManager.unfixPage(frame, true);
+	return true;
 }
 
 Record& SPSegment::lookup(TID tid)

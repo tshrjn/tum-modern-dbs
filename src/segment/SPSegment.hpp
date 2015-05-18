@@ -29,7 +29,7 @@ public:
     /*
      * Deletes the record pointed to by tid and updates the page header accordingly.
      */
-    bool remove(TID tid);
+   	bool remove(TID tid);
 
     /*
      * Returns the read-only record (cf. Record.hpp on the website) associated with TID tid.
