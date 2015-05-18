@@ -105,6 +105,12 @@ public:
 	// Stores the data in the given slotId
 	void storeData(uint16_t slotId, char *data);
 
+	// Return the data of the slot
+	char* getData(uint16_t slotId);
+
+	// Return the length of the slot
+	uint16_t getLength(uint16_t);
+
 	// Remove the slot
 	void removeSlot(uint16_t slotId);
 

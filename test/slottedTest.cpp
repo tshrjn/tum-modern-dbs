@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
 
    // Setting everything
    BufferManager bm(100);
-   // @TODO ...
-   SPSegment sp(bm, 1);
+   // @TODO Initially the SPSegement does not have any page
+   SPSegment sp(bm, 1, 0);
    Random64 rnd;
 
    // Insert some records

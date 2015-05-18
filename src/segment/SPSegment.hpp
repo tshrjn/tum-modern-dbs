@@ -4,15 +4,18 @@
 #include "segment/Record.hpp"
 #include "segment/TID.cpp"
 #include "segment/Segment.cpp"
+#include "segment/SlottedPage.hpp"
 
 class SPSegment : Segment {
 private:
+    uint64_t numberPages = 0;
 
 public:
     /*
      * Constructor is given a reference to the buffer manager and a segment id.
      */
-    SPSegment(BufferManager& bm, uint64_t segmentId) : Segment(bm, segmentId) {};
+    SPSegment(BufferManager& bm, uint64_t segmentId, uint64_t numberPages)
+        : Segment(bm, segmentId), numberPages(numberPages) {};
 
     /*
      * Searches through the segment's pages looking for a page with enough space to store r.
@@ -31,7 +34,7 @@ public:
     /*
      * Returns the read-only record (cf. Record.hpp on the website) associated with TID tid.
      */
-    Record lookup(TID tid);
+    Record& lookup(TID tid);
 
     /*
      * Updates the record pointed to by tid with the content of record r.

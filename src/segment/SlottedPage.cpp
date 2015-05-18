@@ -130,6 +130,15 @@ void SlottedPage::storeData(uint16_t slotId, char *newData) {
 	memcpy(data + first, newData, length);
 }
 
+char* SlottedPage::getData(uint16_t slotId) {
+	auto first = slots[slotId].offset;
+	return data + first;
+}
+
+uint16_t SlottedPage::getLength(uint16_t slotId) {
+	return slots[slotId].length;
+}
+
 void SlottedPage::updateFirstSlot() {
 	auto newFirst = header.firstFreeSlot + 1;
 	// first check if any of the slots is zero
