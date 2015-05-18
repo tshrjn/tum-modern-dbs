@@ -19,11 +19,6 @@ SchemaSegment::SchemaSegment(BufferManager& bm, uint64_t segmentId)
     deserialize();
 }
 
-/**
- * Phlip: This only works if the schema requires less than a page in size.
- * Andre: According to Prof. Neumann that is totally ok!
- * As example he told us that MySQL will fail with a schema larger than page size
- */
 void SchemaSegment::serialize()
 {
     std::unordered_set<BufferFrame*> framePtrs;
