@@ -7,7 +7,7 @@ protected:
     /**
      * Segment id
      */
-    uint64_t id;
+    uint64_t segmentId;
 
     /**
      * Size in number of pages.
@@ -20,10 +20,10 @@ protected:
     BufferManager& bufferManager;
 
 public:
-    Segment(BufferManager &bufferManager, uint64_t id) : id(id), size(0), bufferManager(bufferManager) {}
+    Segment(BufferManager &bufferManager, uint64_t segmentId) : segmentId(segmentId), size(0), bufferManager(bufferManager) {}
 
-    uint64_t getID() {
-        return id;
+    uint64_t getSegmentId() {
+        return segmentId;
     }
 
     size_t getSize() {

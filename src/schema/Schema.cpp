@@ -61,8 +61,8 @@ std::string Schema::serialize() const {
     // Store the string of the schema in the data pointer of a buffer frame.
     std::string schemaString = out.str();
 
-    std::cout << "Schema.serialize: Successfully serialzed schema" << std::endl; 
-    std::cout << schemaString << std::endl;
+    // std::cout << "Schema.serialize: Successfully serialzed schema" << std::endl; 
+    // std::cout << schemaString << std::endl;
 
     return schemaString;
 }
@@ -117,8 +117,8 @@ std::unique_ptr<Schema> Schema::deserialize(const char *data) {
       schema->relations.push_back(relation);
    }
 
-   std::cout << "Schema.deserialize: Successfully deserialized schema" << std::endl; 
-   std::cout << schema->toString() << std::endl;
+   // std::cout << "Schema.deserialize: Successfully deserialized schema" << std::endl; 
+   // std::cout << schema->toString() << std::endl;
 
    return move(schema);
 }

@@ -17,13 +17,15 @@ int main(int argc, char* argv[])
 
     Parser parser(argv[1]);
     try {
-        BufferManager bufferManager(1);
+        BufferManager bufferManager(10);
 
         // serialize schema to disk
         std::unique_ptr<Schema> schema = parser.parse();
         SchemaSegment schemaSegment(bufferManager, 0, std::move(schema));
+        // bufferManager.flushAll();
         // deserialize schema from disk
         SchemaSegment schemaSegment2(bufferManager, 0);
+        // bufferManager.flushAll();
 
         // test if deserialized schema is equal to the original schema
         std::unique_ptr<Schema> originalSchema = parser.parse();

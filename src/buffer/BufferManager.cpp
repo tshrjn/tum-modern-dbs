@@ -186,3 +186,9 @@ int BufferManager::getSegmentFd(uint16_t segmentID) {
     }
     return fd;
 }
+
+void BufferManager::flushAll() {
+    for (auto& kv: bufferFrameMap) {
+        kv.second->flush();
+    }
+}

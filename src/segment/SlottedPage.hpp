@@ -1,11 +1,12 @@
 #ifndef H_SLOTTEDPAGE_HPP
 #define H_SLOTTEDPAGE_HPP
 
+#include <stdlib.h>
+#include <string.h>
 #include <cstdio>
 #include <cstdint>
 #include "buffer/BufferFrame.hpp"
 #include "segment/TID.cpp"
-
 #include <iostream>
 
 // Struct to hold a whole slottedPage

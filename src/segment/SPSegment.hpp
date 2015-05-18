@@ -12,7 +12,7 @@ public:
     /*
      * Constructor is given a reference to the buffer manager and a segment id.
      */
-    SPSegment(BufferManager& bm, uint64_t id) : Segment(bm, id) {};
+    SPSegment(BufferManager& bm, uint64_t segmentId) : Segment(bm, segmentId) {};
 
     /*
      * Searches through the segment's pages looking for a page with enough space to store r.

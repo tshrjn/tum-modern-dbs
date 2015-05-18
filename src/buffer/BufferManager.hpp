@@ -31,6 +31,12 @@ public:
      */
     void unfixPage(BufferFrame& frame, bool isDirty);
 
+    /*
+     * Flush all pages
+     * Attention: Does not check locks!
+     */
+    void flushAll();
+
 private:
     // maximum number of bufferd pages
     size_t maxPageCount;
