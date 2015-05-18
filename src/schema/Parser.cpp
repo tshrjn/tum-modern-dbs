@@ -92,7 +92,7 @@ void Parser::nextToken(unsigned line, const std::string& token, Schema& schema) 
       case State::Table:
          if (isIdentifier(tok)) {
             state=State::TableName;
-            schema.relations.push_back(Schema::Relation(token));
+            schema.relations.push_back(Schema::Relation(token, nextSegmentId++, 0));
          } else {
             throw ParserError(line, "Expected TableName, found '"+token+"'");
          }

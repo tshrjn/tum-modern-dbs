@@ -15,12 +15,11 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    Parser parser(argv[1]);
     try {
         BufferManager bufferManager(10);
 
         // serialize schema to disk
-        std::unique_ptr<Schema> schema = parser.parse();
+        std::unique_ptr<Schema> schema = Parser(argv[1]).parse();
         SchemaSegment schemaSegment(bufferManager, 0, std::move(schema));
         // bufferManager.flushAll();
         // deserialize schema from disk
@@ -28,7 +27,9 @@ int main(int argc, char* argv[])
         // bufferManager.flushAll();
 
         // test if deserialized schema is equal to the original schema
-        std::unique_ptr<Schema> originalSchema = parser.parse();
+        std::unique_ptr<Schema> originalSchema = Parser(argv[1]).parse();
+        cout << originalSchema->toString() << endl;
+
         if (originalSchema->toString().compare(schemaSegment2.getSchema()->toString()) == 0) {
             cout << "Test successfull" << endl;
             return 0;

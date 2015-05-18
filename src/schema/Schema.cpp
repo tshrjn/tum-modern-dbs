@@ -22,9 +22,9 @@ static std::string type(const Schema::Relation::Attribute& attr) {
 }
 
 std::string Schema::toString() const {
-   std::stringstream out;
+   std::stringstream out; 
    for (const Schema::Relation& rel : relations) {
-      out << rel.name << std::endl;
+      out << rel.name << " (" << rel.segmentId << ") " << rel.numberPages << " pages" << std::endl;
       out << "\tPrimary Key:";
       for (unsigned keyId : rel.primaryKey)
          out << ' ' << rel.attributes[keyId].name;
@@ -37,13 +37,17 @@ std::string Schema::toString() const {
 
 std::string Schema::serialize() const {
    std::cout << "Schema.serialize" << std::endl;
-
+ 
    std::stringstream out;
 
     // Transform schema object to an easily readable string.
     out << relations.size() << std::endl;
     for (const Schema::Relation& rel : relations) {
-        out << rel.name << " " << rel.attributes.size() << " " << rel.primaryKey.size() << std::endl;
+        // header
+        out << rel.name << " " << rel.segmentId << " " << rel.numberPages << std::endl;
+        // length of the arrays
+        out << rel.attributes.size() << " " << rel.primaryKey.size() << std::endl;
+
         for (unsigned keyId : rel.primaryKey)
             out << keyId << " ";
         out << std::endl;
@@ -61,8 +65,8 @@ std::string Schema::serialize() const {
     // Store the string of the schema in the data pointer of a buffer frame.
     std::string schemaString = out.str();
 
-    // std::cout << "Schema.serialize: Successfully serialzed schema" << std::endl; 
-    // std::cout << schemaString << std::endl;
+    std::cout << "Schema.serialize: Successfully serialzed schema" << std::endl; 
+    std::cout << schemaString << std::endl;
 
     return schemaString;
 }
@@ -81,10 +85,17 @@ std::unique_ptr<Schema> Schema::deserialize(const char *data) {
    // parse relations
    for (int i = 0; i < relations; i++) {
       std::string name;
+      uint16_t segmentId;
+      uint64_t pages;
       int attributes, keys;
-      ss >> name >> attributes >> keys;
 
-      Schema::Relation relation(name);
+      // header
+      ss >> name >> segmentId >> pages;
+
+      // length of arrays
+      ss >> attributes >> keys;
+
+      Schema::Relation relation(name, segmentId, pages);
 
       // parse keys
       for (int j = 0; j < keys; j++) {
@@ -117,8 +128,8 @@ std::unique_ptr<Schema> Schema::deserialize(const char *data) {
       schema->relations.push_back(relation);
    }
 
-   // std::cout << "Schema.deserialize: Successfully deserialized schema" << std::endl; 
-   // std::cout << schema->toString() << std::endl;
+   std::cout << "Schema.deserialize: Successfully deserialized schema" << std::endl; 
+   std::cout << schema->toString() << std::endl;
 
    return move(schema);
 }

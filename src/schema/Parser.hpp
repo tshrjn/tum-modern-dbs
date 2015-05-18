@@ -34,6 +34,8 @@ struct Parser {
 
    private:
    void nextToken(unsigned line, const std::string& token, Schema& s);
+
+   uint16_t nextSegmentId = 1;
 };
 
 #endif

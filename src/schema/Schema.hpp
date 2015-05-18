@@ -18,10 +18,24 @@ struct Schema {
          bool notNull;
          Attribute() : len(~0), notNull(true) {}
       };
+      
+      // The "head" of a relation contains the relation name, the segment_id and number_pages
       std::string name;
+      uint16_t segmentId;
+      uint64_t numberPages;
+
+      // Of course a relation contains multiple attributes
       std::vector<Schema::Relation::Attribute> attributes;
+
+      // And a primary key
       std::vector<unsigned> primaryKey;
-      Relation(const std::string& name) : name(name) {}
+
+      Relation(const std::string& name,
+         const uint16_t& segmentId, const uint64_t& numberPages)
+         : name(name), segmentId(segmentId), numberPages(numberPages) {
+            std::cout << "segmentId: " << segmentId << std::endl;
+            std::cout << "numberPages: " << numberPages << std::endl;
+         }
    };
    std::vector<Schema::Relation> relations;
    std::string toString() const;
