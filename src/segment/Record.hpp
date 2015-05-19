@@ -7,7 +7,7 @@
 
 // A simple Record implementation
 class Record {
-   uint32_t len;
+   uint64_t len;
    char* data;
 
 public:
@@ -20,20 +20,20 @@ public:
    // Move Constructor
    Record(Record&& t);
    // Constructor
-   Record(unsigned len, const char* const ptr);
+   Record(uint64_t len, const char* const ptr);
    // Destructor
    ~Record();
    // Get pointer to data
    const char* getData() const;
    // Get data size in bytes
-   unsigned getLen() const;
+   uint64_t getLen() const;
 
    // Get byte representation of record
    char* serialize() const;
    // Get record of bytes
    static Record* deserialize(char* data);
    // Get the buffer size for the serialized record
-   uint16_t serializedSize() const;
+   uint64_t serializedSize() const;
 
 };
 

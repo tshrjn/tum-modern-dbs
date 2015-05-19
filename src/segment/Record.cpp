@@ -5,7 +5,7 @@ Record::Record(Record&& t) : len(t.len), data(t.data) {
    t.len = 0;
 }
 
-Record::Record(unsigned len, const char* const ptr) : len(len) {
+Record::Record(uint64_t len, const char* const ptr) : len(len) {
    data = static_cast<char*>(malloc(len));
    if (data)
       memcpy(data, ptr, len);
@@ -15,7 +15,7 @@ const char* Record::getData() const {
    return data;
 }
 
-unsigned Record::getLen() const {
+uint64_t Record::getLen() const {
    return len;
 }
 
@@ -24,18 +24,18 @@ Record::~Record() {
 }
 
 char* Record::serialize() const {
-	auto bufferSize = sizeof(unsigned) + getLen();
+	auto bufferSize = sizeof(uint64_t) + getLen();
 	char* buffer = new char[bufferSize];
-	memcpy(buffer, &len, sizeof(unsigned));
-	memcpy(buffer+sizeof(unsigned), getData(), getLen());
+	memcpy(buffer, &len, sizeof(uint64_t));
+	memcpy(buffer+sizeof(uint64_t), getData(), getLen());
 	return buffer;
 }
 
-uint16_t Record::serializedSize() const {
-	return sizeof(unsigned) + getLen();
+uint64_t Record::serializedSize() const {
+	return sizeof(uint64_t) + getLen();
 }
 
 Record* Record::deserialize(char* serialized) {
-	uint32_t len = *((unsigned*) serialized);
-    return new Record(len, serialized + sizeof(unsigned));
+	uint64_t len = *((uint64_t*) serialized);
+    return new Record(len, serialized + sizeof(uint64_t));
 }
