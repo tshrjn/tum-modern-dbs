@@ -19,6 +19,7 @@ $ ./bin/buffertest <pagesOnDisk> <pagesInRAM> <threads>
 
 ## Assignment 03
 
+Run & test with:
 ```bash
 $ make all
 $ ./bin/schemaTest test/test.sql
