@@ -20,7 +20,7 @@ public:
    // Move Constructor
    Record(Record&& t);
    // Constructor
-   Record(uint32_t len, const char* const ptr);
+   Record(unsigned len, const char* const ptr);
    // Destructor
    ~Record();
    // Get pointer to data
