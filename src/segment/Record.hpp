@@ -7,7 +7,7 @@
 
 // A simple Record implementation
 class Record {
-   uint16_t len;
+   uint32_t len;
    char* data;
 
 public:
@@ -20,7 +20,7 @@ public:
    // Move Constructor
    Record(Record&& t);
    // Constructor
-   Record(unsigned len, const char* const ptr);
+   Record(uint32_t len, const char* const ptr);
    // Destructor
    ~Record();
    // Get pointer to data
