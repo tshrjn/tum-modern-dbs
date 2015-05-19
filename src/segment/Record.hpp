@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <stdint.h>
 
 // A simple Record implementation
 class Record {
