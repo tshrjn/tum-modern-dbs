@@ -19,8 +19,12 @@ $ ./bin/buffertest <pagesOnDisk> <pagesInRAM> <threads>
 
 ## Assignment 03
 
-Create schema with:
 ```bash
-$ make schema
-$ ./bin/schema test/test.sql
+$ make all
+$ ./bin/schemaTest test/test.sql
+$ ./bin/schemaTest test/testLong.sql
+$ ./bin/pidTest
+$ ./bin/tidTest
+$ ./bin/slottedPageTest
+$ ./bin/slottedTest 16384
 ```
