@@ -97,3 +97,14 @@ void BufferFrame::unlock()
 {
     pthread_rwlock_unlock(&frameLock);
 }
+
+void BufferFrame::printHex(void *mem, unsigned bytes) {
+  int i;
+  unsigned char *p = (unsigned char *)mem;
+  for (i=0;i<bytes;i++) {
+    printf("0x%02x ", p[i]);
+    if (i%16==0)
+      printf("\n");
+  }
+  printf("\n");
+}

@@ -78,7 +78,10 @@ int main(int argc, char** argv) {
          break;
 
       // Insert record
-      TID tid = sp.insert(Record(s.size(), s.c_str()));
+      auto rec = new Record(s.size(), s.c_str());
+      TID tid = sp.insert(rec);
+      delete rec;
+
       assert(values.find(tid)==values.end()); // TIDs should not be overwritten
       values[tid]=r;
       unsigned pageId = extractPage(tid); // extract the pageId from the TID
@@ -98,9 +101,9 @@ int main(int argc, char** argv) {
       unsigned len = value.size();
 
       // Lookup
-      Record& rec = sp.lookup(tid);
-      assert(rec.getLen() == len);
-      assert(memcmp(rec.getData(), value.c_str(), len)==0);
+      Record* rec = sp.lookup(tid);
+      assert(rec->getLen() == len);
+      assert(memcmp(rec->getData(), value.c_str(), len)==0);
 
       if (del) { // do delete
          assert(sp.remove(tid));
@@ -119,7 +122,9 @@ int main(int argc, char** argv) {
       const string s = testData[r];
 
       // Replace old with new value
-      sp.update(tid, Record(s.size(), s.c_str()));
+      auto rec = new Record(s.size(), s.c_str());
+      sp.update(tid, rec);
+      delete(rec);
       values[tid]=r;
    }
 
@@ -128,10 +133,13 @@ int main(int argc, char** argv) {
       TID tid = p.first;
       const std::string& value = testData[p.second];
       unsigned len = value.size();
-      Record& rec = sp.lookup(tid);
-      assert(rec.getLen() == len);
-      assert(memcmp(rec.getData(), value.c_str(), len)==0);
+      Record* rec = sp.lookup(tid);
+      assert(rec->getLen() == len);
+
+      assert(memcmp(rec->getData(), value.c_str(), len)==0);
    }
+
+   std::cout << "Test successfull" << std::endl;
 
    return 0;
 }

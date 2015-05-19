@@ -63,6 +63,8 @@ public:
     bool lockWrite(bool blocking);
     bool lockRead(bool blocking);
     void unlock();
+
+    static void printHex(void *mem, unsigned bytes);
 };
 
 #endif //  BUFFERFRAME_HPP

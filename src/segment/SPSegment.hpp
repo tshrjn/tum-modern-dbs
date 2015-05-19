@@ -25,7 +25,7 @@ public:
      * Note: This can be implemented much more efficiently with a free space bitmap
      * as described in chapter 3, slide 3, but you are not required to do this.
      */
-    TID insert(const Record& r);
+    TID insert(Record* r);
 
     /*
      * Deletes the record pointed to by tid and updates the page header accordingly.
@@ -35,12 +35,12 @@ public:
     /*
      * Returns the read-only record (cf. Record.hpp on the website) associated with TID tid.
      */
-    Record& lookup(TID tid);
+    Record* lookup(TID tid);
 
     /*
      * Updates the record pointed to by tid with the content of record r.
      */
-    bool update(TID tid, const Record& r);
+    bool update(TID tid, Record* r);
 
 };
 

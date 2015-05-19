@@ -10,6 +10,8 @@ class Record {
    char* data;
 
 public:
+   static const auto headerSize = sizeof(len);
+
    // Assignment Operator: deleted
    Record& operator=(Record& rhs) = delete;
    // Copy Constructor: deleted
@@ -24,8 +26,14 @@ public:
    const char* getData() const;
    // Get data size in bytes
    unsigned getLen() const;
-   // Get total record length
-   unsigned getTotalLen() const { return sizeof(this) - sizeof(char*) + getLen(); }
+
+   // Get byte representation of record
+   char* serialize() const;
+   // Get record of bytes
+   static Record* deserialize(char* data);
+   // Get the buffer size for the serialized record
+   uint16_t serializedSize() const;
+
 };
 
 #endif
