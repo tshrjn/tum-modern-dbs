@@ -16,7 +16,6 @@ $ make buffer
 $ ./bin/buffertest <pagesOnDisk> <pagesInRAM> <threads>
 ```
 
-
 ## Assignment 03
 
 Run & test with:
@@ -28,4 +27,16 @@ $ ./bin/pidTest
 $ ./bin/tidTest
 $ ./bin/slottedPageTest
 $ ./bin/slottedTest 16384
+```
+
+## Assignment 04
+
+Run with:
+```bash
+$ make all
+$ ./bin/btreeTest <numberOfElements>
+```
+for example:
+```bash
+$ ./bin/btreeTest 10000
 ```
