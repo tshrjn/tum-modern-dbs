@@ -7,13 +7,13 @@
 #include <math.h> 
 
 
-SchemaSegment::SchemaSegment(BufferManager& bufferManager, uint64_t segmentId, std::unique_ptr<Schema> schema)
+SchemaSegment::SchemaSegment(BufferManager& bufferManager, uint16_t segmentId, std::unique_ptr<Schema> schema)
         : Segment(bufferManager, segmentId), schema(std::move(schema))
 {
     serialize();
 }
 
-SchemaSegment::SchemaSegment(BufferManager& bm, uint64_t segmentId)
+SchemaSegment::SchemaSegment(BufferManager& bm, uint16_t segmentId)
         : Segment(bm, segmentId), schema(std::unique_ptr<Schema>(new Schema()))
 {
     deserialize();

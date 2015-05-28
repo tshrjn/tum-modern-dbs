@@ -66,7 +66,7 @@ Record* SPSegment::lookup(TID tid) {
 	SlottedPage* page = (SlottedPage*) frame->getData();
 
 	auto serialized = page->getData(slotId);
-	auto result =  Record::deserialize(serialized);
+	auto result = Record::deserialize(serialized);
 	
 	bufferManager.unfixPage(frame, false);
 	return result;
@@ -84,7 +84,7 @@ bool SPSegment::update(TID tid, Record* r) {
 	auto frame = bufferManager.fixPage(PID(segmentId, pageId), true);
 	SlottedPage* page = (SlottedPage*) frame->getData();
 	auto serialized = page->getData(slotId);
-	auto oldRecord =  Record::deserialize(serialized);
+	auto oldRecord = Record::deserialize(serialized);
 
 	if(oldRecord->getLen() == r->getLen()){
 		// just overwrite

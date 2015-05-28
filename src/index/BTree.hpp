@@ -1,8 +1,9 @@
 #ifndef BTREE_HPP
 #define BTREE_HPP
 
-#include "../src/buffer/BufferFrame.hpp"
-#include "../src/buffer/BufferManager.hpp"
+#include "../buffer/BufferFrame.hpp"
+#include "../buffer/BufferManager.hpp"
+#include "../buffer/PID.cpp"
 #include "../segment/Segment.cpp"
 #include "../segment/TID.cpp"
 #include <string.h> // memcpy
@@ -241,8 +242,8 @@ public:
     /**
      * Instantiate a new BTree. Creates an empty leaf node and sets it as the root.
      */
-    BTree(BufferManager &bufferManager, uint64_t id) : Segment(bufferManager, id), root(0), numberOfEntries(0) {
-        BufferFrame *bufferFrame = bufferManager.fixPage(root, true);
+    BTree(BufferManager &bufferManager, uint16_t segmentId) : Segment(bufferManager, segmentId), root(0), numberOfEntries(0) {
+        BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), true);
         void *dataPointer = bufferFrame->getData();
         new(dataPointer) LeafNode();
         bufferManager.unfixPage(bufferFrame, true);
@@ -288,7 +289,7 @@ public:
         this->numberOfEntries++;
 
         // start with the root
-        BufferFrame *bufferFrame = bufferManager.fixPage(root, true);
+        BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), true);
         bool bufferFrameIsDirty = false;
         Node *node = static_cast<Node *>(bufferFrame->getData());
 
@@ -300,7 +301,7 @@ public:
             if (node->isFull()) {
                 // @TODO: Not thread safe. Making size atomic is enough?!
                 uint64_t newPageID = ++this->size;
-                BufferFrame *newBufferFrame = bufferManager.fixPage(newPageID, true);
+                BufferFrame *newBufferFrame = bufferManager.fixPage(PID(segmentId, newPageID), true);
 
                 K separator;
                 if (node->isLeaf()) {
@@ -315,7 +316,7 @@ public:
                 if (bufferFrameOfParent == nullptr) {
                     // reserve another page to move the old root to
                     uint64_t movedOldRootID = ++this->size;
-                    BufferFrame *movedOldRootBufferFrame = bufferManager.fixPage(movedOldRootID, true);
+                    BufferFrame *movedOldRootBufferFrame = bufferManager.fixPage(PID(segmentId, movedOldRootID), true);
 
                     // move current root node to the new page
                     memcpy(movedOldRootBufferFrame->getData(), bufferFrame->getData(), BufferFrame::frameSize);
@@ -366,7 +367,7 @@ public:
                     InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
                     uint64_t nextID = innerNode->getChild(key);
 
-                    BufferFrame *bufferFrameOfChild = bufferManager.fixPage(nextID, true);
+                    BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), true);
                     if (bufferFrameOfParent != nullptr) {
                         bufferManager.unfixPage(bufferFrameOfParent, bufferFrameOfParentIsDirty);
                     }
@@ -426,7 +427,7 @@ private:
      */
     BufferFrame *findLeaf(K &key, bool lock, LeafNode **leafPointer) {
         // Start with the root
-        BufferFrame *bufferFrame = bufferManager.fixPage(root, lock);
+        BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), lock);
         Node *node = static_cast<Node *>(bufferFrame->getData());
 
         // Traverse to the leaf
@@ -434,7 +435,7 @@ private:
             InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
             uint64_t nextID = innerNode->getChild(key);
 
-            BufferFrame *bufferFrameOfChild = bufferManager.fixPage(nextID, true);
+            BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), true);
 
             bufferManager.unfixPage(bufferFrame, false);
             bufferFrame = bufferFrameOfChild;

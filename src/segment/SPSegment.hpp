@@ -15,7 +15,7 @@ public:
     /*
      * Constructor is given a reference to the buffer manager and a segment id.
      */
-    SPSegment(BufferManager& bm, uint64_t segmentId, uint64_t numberPages)
+    SPSegment(BufferManager& bm, uint16_t segmentId, uint64_t numberPages)
         : Segment(bm, segmentId), numberPages(numberPages) {};
 
     /*

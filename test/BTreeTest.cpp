@@ -70,7 +70,7 @@ const IntPair &getKey(const uint64_t &i) {
 template<class T, class CMP>
 void test(uint64_t n) {
     // Set up stuff, you probably have to change something here to match to your interfaces
-    BufferManager bufferManager(1000);
+    BufferManager bufferManager(10);
     BTree<T, CMP> bTree(bufferManager, 4);
 
     // Insert values
