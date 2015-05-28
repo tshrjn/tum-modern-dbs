@@ -269,9 +269,9 @@ public:
      * 5. otherwise, continue with 2.
      */
     bool lookup(K key, TID &tid) {
-        LeafNode *leaf;
-        BufferFrame *bufferFrame = findLeaf(key, false, &leaf);
-        bool found = leaf->getTID(key, tid);
+        BufferFrame *bufferFrame = findLeaf(key, false);
+        LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
+        auto found = leaf->getTID(key, tid);
         bufferManager.unfixPage(bufferFrame, false);
         return found;
     }
@@ -303,7 +303,9 @@ public:
         bool bufferFrameOfParentIsDirty = false;
 
         while (true) {
+            // @TODO: Big blob of code, break it up into functions?
             if (node->isFull()) {
+                // we need to create a new node
                 uint64_t newPageID = ++this->size;
                 BufferFrame *newBufferFrame = bufferManager.fixPage(PID(segmentId, newPageID), true);
 
@@ -318,11 +320,9 @@ public:
 
                 // Is this the root?
                 if (bufferFrameOfParent == nullptr) {
-                    // reserve another page to move the old root to
+                    // create another page and move the old root there
                     uint64_t movedOldRootID = ++this->size;
                     BufferFrame *movedOldRootBufferFrame = bufferManager.fixPage(PID(segmentId, movedOldRootID), true);
-
-                    // move current root node to the new page
                     memcpy(movedOldRootBufferFrame->getData(), bufferFrame->getData(), BufferFrame::frameSize);
 
                     // Create the new root with the old (moved) root as its first child
@@ -336,7 +336,7 @@ public:
                     bufferFrameIsDirty = true;
 
                 } else {
-                    // update parent
+                    // not the root, so just insert separator into the parent
                     InnerNode *parentNode = static_cast<InnerNode *>(bufferFrameOfParent->getData());
 
                     parentNode->insert(separator, newBufferFrame->getPageID().getPage());
@@ -394,10 +394,10 @@ public:
      * 2. Remove entry from that page
      */
     bool erase(K key) {
-        LeafNode *leaf;
-        BufferFrame *bufferFrame = findLeaf(key, true, &leaf);
+        BufferFrame *bufferFrame = findLeaf(key, true);
+        LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
 
-        bool found = leaf->remove(key);
+        auto found = leaf->remove(key);
         if (found)
             this->numberOfEntries--;
 
@@ -425,10 +425,9 @@ private:
     /**
      * Helper function to traverse down to the correct leaf given a key.
      * If lock is true, the page of the current node will be held exclusively.
-     * If the leaf can be found the leaf node is stored in the third parameter,
-     * the function returns a pointer to the bufferFrame of the leaf node.
+     * The function returns a pointer to the bufferFrame of the leaf node.
      */
-    BufferFrame *findLeaf(K &key, bool lock, LeafNode **leafPointer) {
+    BufferFrame *findLeaf(K &key, bool lock) {
         // Start with the root
         BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), lock);
         Node *node = static_cast<Node *>(bufferFrame->getData());
@@ -446,7 +445,6 @@ private:
             node = static_cast<Node *>(bufferFrame->getData());
         }
 
-        *leafPointer = reinterpret_cast<LeafNode *>(node);
         return bufferFrame;
     }
 };
