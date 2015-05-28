@@ -16,7 +16,8 @@ all: \
 	bin/slottedPageTest \
 	bin/slottedTest \
 	bin/tidTest \
-	bin/pidTest
+	bin/pidTest \
+	bin/btreeTest
 
 clean:
 	find bin -name '*.d' -delete -o -name '*.o' -delete -o '(' -perm -u=x '!' -type d ')' -delete

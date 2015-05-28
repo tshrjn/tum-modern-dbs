@@ -22,3 +22,6 @@ bin/slottedTest: bin/test/slottedTest.o $(obj_buffer) $(obj_schema) $(obj_segmen
 
 bin/tidTest: bin/test/tidTest.o $(obj_buffer) $(obj_schema) $(obj_segment)
 	$(BUILDEXE) -pthread
+
+bin/btreeTest: bin/test/BTreeTest.o $(obj_buffer) $(obj_schema) $(obj_segment) $(obj_index)
+	$(BUILDEXE) -pthread

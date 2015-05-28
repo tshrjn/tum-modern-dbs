@@ -1,0 +1,5 @@
+bin/index/%.o: src/index/%.cpp
+	$(CHECKDIR)
+	$(CC) -o$@ -c $(CXXFLAGS) $<
+
+obj_index:=bin/index/BTree.o
