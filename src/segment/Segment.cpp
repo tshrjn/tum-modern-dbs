@@ -1,6 +1,7 @@
 #ifndef SEGMENT_HPP
 #define SEGMENT_HPP
 #include "buffer/BufferManager.hpp"
+#include <atomic>
 
 class Segment {
 protected:
@@ -12,7 +13,7 @@ protected:
     /**
      * Size in number of pages.
      */
-    size_t size;
+    std::atomic<size_t> size;
 
     /**
      * Reference to global buffer manager instance.
@@ -27,7 +28,7 @@ public:
     }
 
     size_t getSize() {
-        return size;
+        return size.load();
     }
 };
 

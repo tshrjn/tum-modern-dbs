@@ -10,6 +10,11 @@
 #include <algorithm> // lower_bound
 #include <iostream>
 
+/**
+ * @TODO: (SHOULD) Cleanup when leaf becomes empty (free page). We don't need to implement rebalancing, though.
+ * Or maybe just recreate tree when there are too many empty pages...
+ * @TODO: (OPTIONAL) Write a test suite for multiple threads....
+ */
 
 template<class K, class CMP = std::less<K> >
 class BTree : public Segment {
@@ -299,7 +304,6 @@ public:
 
         while (true) {
             if (node->isFull()) {
-                // @TODO: Not thread safe. Making size atomic is enough?!
                 uint64_t newPageID = ++this->size;
                 BufferFrame *newBufferFrame = bufferManager.fixPage(PID(segmentId, newPageID), true);
 
@@ -388,7 +392,6 @@ public:
      * Delete:
      * 1. Lookup the correct leaf page
      * 2. Remove entry from that page
-     * @TODO: leaf becomes empty, free page. We don't need to do rebalancing, but we should free empty pages.
      */
     bool erase(K key) {
         LeafNode *leaf;
