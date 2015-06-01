@@ -317,12 +317,11 @@ public:
 
                     new(bufferFrame->getData()) InnerNode(movedOldRootID, newBufferFrame->getPageID().getPage(),
                                                           separator);
-
                     bufferFrameOfParent = bufferFrame;
                     bufferFrame = movedOldRootBufferFrame;
                 }
 
-		        bufferFrameIsDirty = true;
+                bufferFrameIsDirty = true;
                 bufferFrameOfParentIsDirty = true;
 
                 // choose correct node to follow
@@ -351,8 +350,8 @@ public:
                     bufferFrameIsDirty = false;
 
                     node = static_cast<Node *>(bufferFrame->getData());
-		        } else {
-		            // found the correct leaf & we have enough space left
+                } else {
+                    // found the correct leaf & we have enough space left
                     LeafNode *leaf = reinterpret_cast<LeafNode *>(node);
                     leaf->insert(key, tid);
 
