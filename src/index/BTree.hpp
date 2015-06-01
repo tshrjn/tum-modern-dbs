@@ -295,7 +295,6 @@ public:
 
         while (true) {
             if (node->isFull()) {
-                // we need to create a new node
                 uint64_t newPageID = ++this->size;
                 BufferFrame *newBufferFrame = bufferManager.fixPage(PID(segmentId, newPageID), true);
 
@@ -308,36 +307,32 @@ public:
                     separator = oldInner->split(newBufferFrame);
                 }
 
-                // Is this the root?
+                // Is this the root node?
                 if (bufferFrameOfParent == nullptr) {
-                    // create another page and move the old root there
+                    // move the old root, create new root and attach old root
                     uint64_t movedOldRootID = ++this->size;
                     BufferFrame *movedOldRootBufferFrame = bufferManager.fixPage(PID(segmentId, movedOldRootID), true);
                     memcpy(movedOldRootBufferFrame->getData(), bufferFrame->getData(), BufferFrame::frameSize);
 
-                    // Create the new root with the old (moved) root as its first child
                     new(bufferFrame->getData()) InnerNode(movedOldRootID, newBufferFrame->getPageID().getPage(),
                                                           separator);
 
                     bufferFrameOfParent = bufferFrame;
-                    bufferFrameOfParentIsDirty = true;
-
                     bufferFrame = movedOldRootBufferFrame;
-                    bufferFrameIsDirty = true;
 
                 } else {
                     // not the root, so just insert separator into the parent
                     InnerNode *parentNode = static_cast<InnerNode *>(bufferFrameOfParent->getData());
 
                     parentNode->insert(separator, newBufferFrame->getPageID().getPage());
-                    bufferFrameIsDirty = true;
-                    bufferFrameOfParentIsDirty = true;
                 }
 
-                // insert entry
+		bufferFrameIsDirty = true;
+                bufferFrameOfParentIsDirty = true;
+
+                // insert new entry
                 if (!cmp(separator, key)) {
                     bufferManager.unfixPage(newBufferFrame, true);
-                    newBufferFrame = NULL;
                 } else {
                     bufferManager.unfixPage(bufferFrame, true);
                     bufferFrame = newBufferFrame;
