@@ -255,18 +255,15 @@ public:
         size = 1;
     };
 
+    
     size_t getNumberOfEntries() {
         return numberOfEntries;
     }
 
     /**
-     * Lookup:
-     * 1. Begin with the root node
-     * 2. current node is a leaf?
-     * 3.1 yes => return the page
-     * 3.1 otherwise, find the first entry with key >= search key
-     * 4. no such entry exists =>
-     * 5. otherwise, continue with 2.
+     * Lookup an entry in the B-Tree.
+     * Returns true if the key was found, false otherwise.
+     * The second parameter TID is given a reference to the found tuple.
      */
     bool lookup(K key, TID &tid) {
         BufferFrame *bufferFrame = findLeaf(key, false);
@@ -277,17 +274,8 @@ public:
     }
 
     /**
-     * Insert:
-     * 1. Lookup the key, find the leaf.
-     * 2. Is there still space in the leaf?
-     * 3.1 yes => insert entry
-     * 3.2 no => split the leaf into two leafs & insert new entry in correct place
-     * 4. Insert the maximum of the left node (page) as the separator key into the parent node
-     * 5. If the parent overflows, split parent and continue with 4
-     * If a node as no parent to put the separator in, create a new root.
-     *
-     * When we go down, we load the page of the node exclusively, and we also keep the page of the direct parent.
-     * This is enough for concurrency control.
+     * Inserts a new entry into the btree.
+     * For concurrent access we use the "safe" inner pages approach.
      *
      */
     void insert(K key, TID tid) {
@@ -389,9 +377,8 @@ public:
     }
 
     /**
-     * Delete:
-     * 1. Lookup the correct leaf page
-     * 2. Remove entry from that page
+     * Deletes an entry from a B-Tree.
+     * We ignore underfull nodes/leafs.
      */
     bool erase(K key) {
         BufferFrame *bufferFrame = findLeaf(key, true);

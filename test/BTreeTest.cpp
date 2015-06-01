@@ -70,19 +70,21 @@ const IntPair &getKey(const uint64_t &i) {
 template<class T, class CMP>
 void test(uint64_t n) {
     // Set up stuff, you probably have to change something here to match to your interfaces
-    BufferManager bufferManager(10);
+    BufferManager bufferManager(100);
     BTree<T, CMP> bTree(bufferManager, 4);
 
     // Insert values
     for (uint64_t i = 0; i < n; ++i)
-        bTree.insert(getKey<T>(i), TID(i, i));
+        bTree.insert(getKey<T>(i), TID(i*i));
 
     assert(bTree.getNumberOfEntries() == n);
 
-    for (uint32_t i = 0; i < n; ++i) {
-        TID tid(i, i);
+    // Check if they can be retrieved
+    for (uint64_t i = 0; i < n; ++i) {
+        TID tid;
         assert(bTree.lookup(getKey<T>(i), tid));
-        assert(tid == (TID(i, i)));
+        std::cout << tid.getValue() << "==" << TID(i*i).getValue() << std::endl;
+        assert(tid == (TID(i*i)));
     }
 
     // Delete some values
@@ -92,13 +94,12 @@ void test(uint64_t n) {
 
     // Check if the right ones have been deleted
     for (uint64_t i = 0; i < n; ++i) {
-        TID tid(i, i);
+        TID tid(i*i);
         if ((i % 7) == 0) {
             assert(!bTree.lookup(getKey<T>(i), tid));
         } else {
             assert(bTree.lookup(getKey<T>(i), tid));
-            assert(tid.getPage() == i);
-            assert(tid.getSlot() == i);
+            assert(tid.getValue() == i*i);
         }
     }
 

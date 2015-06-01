@@ -22,6 +22,7 @@ public:
     TID(uint64_t page, uint16_t slot) : value((page << 16) + slot) { }
 
     TID() : value(0) {}
+    TID(uint64_t tid) : value(tid) {}
 
     uint64_t getValue() const {
       return value;
