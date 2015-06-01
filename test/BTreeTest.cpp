@@ -112,7 +112,7 @@ void test(uint64_t n) {
 
 int main(int argc, char *argv[]) {
     // Get command line argument
-    const uint64_t n = (argc == 2) ? strtoul(argv[1], NULL, 10) : 1000 * 1000ul;
+    const uint64_t n = (argc == 2) ? strtoul(argv[1], NULL, 10) : 100 * 1000ul;
 
     // Test index with 64bit unsigned integers
     test<uint64_t, MyCustomUInt64Cmp>(n);

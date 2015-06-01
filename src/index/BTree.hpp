@@ -199,7 +199,6 @@ class BTree : public Segment {
         void insert(K key, TID tid) {
             auto index = getKeyIndex(key);
             if (index < this->count) {
-                CMP cmp;
                 if (!cmp(key, keys[index])) { // existing key?
                     tids[index] = tid; // overwrite existing value
                     return;
@@ -390,7 +389,7 @@ public:
      * We ignore underfull nodes/leafs.
      */
     bool erase(K key) {
-        BufferFrame *bufferFrame = findLeaf(key, true);
+        BufferFrame *bufferFrame = findLeaf(key, false);
         LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
 
         auto found = leaf->remove(key);
