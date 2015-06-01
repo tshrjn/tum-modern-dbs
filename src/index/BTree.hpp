@@ -109,6 +109,21 @@ class BTree : public Segment {
         }
 
         /**
+         * Remove a separator key from an inner node.
+         */
+        bool remove(K key) {
+            auto index = getKeyIndex(key);
+            if (index == this->count)
+                return false;
+
+            // move existing entries
+            memmove(keys + index, keys + index + 1, (this->count - index - 1) * sizeof(K));
+            memmove(children + index, children + index + 1, (this->count - index - 1) * sizeof(uint64_t));
+            this->count--;
+            return true;
+        }
+
+        /**
          * Split an inner node and return the separator key that should be inserted into the parent.
          */
         K split(BufferFrame *bufferFrame) {
