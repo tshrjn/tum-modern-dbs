@@ -96,10 +96,10 @@ class BTree : public Segment {
                 return;
             }
 
-	    memmove(keys + index + 1, keys + index, (this->count - index - 1) * sizeof(K));
+	        memmove(keys + index + 1, keys + index, (this->count - index - 1) * sizeof(K));
             memmove(children + index + 2, children + index + 1, (this->count - index - 1) * sizeof(uint64_t));
             
-	    keys[index] = key;
+	        keys[index] = key;
             children[index + 1] = child;
             this->count++;
         }
@@ -305,7 +305,11 @@ public:
                 }
 
                 // Is this the root node?
-                if (bufferFrameOfParent == nullptr) {
+                if (bufferFrameOfParent != nullptr) {
+                    // not the root, so just insert separator into the parent
+                    InnerNode *parentNode = static_cast<InnerNode *>(bufferFrameOfParent->getData());
+                    parentNode->insert(separator, newBufferFrame->getPageID().getPage());
+                } else {
                     // move the old root, create new root and attach old root
                     uint64_t movedOldRootID = ++this->size;
                     BufferFrame *movedOldRootBufferFrame = bufferManager.fixPage(PID(segmentId, movedOldRootID), true);
@@ -316,18 +320,12 @@ public:
 
                     bufferFrameOfParent = bufferFrame;
                     bufferFrame = movedOldRootBufferFrame;
-
-                } else {
-                    // not the root, so just insert separator into the parent
-                    InnerNode *parentNode = static_cast<InnerNode *>(bufferFrameOfParent->getData());
-
-                    parentNode->insert(separator, newBufferFrame->getPageID().getPage());
                 }
 
-		bufferFrameIsDirty = true;
+		        bufferFrameIsDirty = true;
                 bufferFrameOfParentIsDirty = true;
 
-                // insert new entry
+                // choose correct node to follow
                 if (!cmp(separator, key)) {
                     bufferManager.unfixPage(newBufferFrame, true);
                 } else {
@@ -338,14 +336,13 @@ public:
 
             } else {
                 if (!node->isLeaf()) {
-		    // traverse without splitting
+		            // traverse without splitting
                     InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
                     uint64_t nextID = innerNode->getChild(key);
 
                     BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), true);
-                    if (bufferFrameOfParent != nullptr) {
+                    if (bufferFrameOfParent != nullptr)
                         bufferManager.unfixPage(bufferFrameOfParent, bufferFrameOfParentIsDirty);
-                    }
 
                     bufferFrameOfParent = bufferFrame;
                     bufferFrameOfParentIsDirty = bufferFrameIsDirty;
@@ -354,14 +351,13 @@ public:
                     bufferFrameIsDirty = false;
 
                     node = static_cast<Node *>(bufferFrame->getData());
-		} else {
-		    // found the correct leaf & we have enough space left
+		        } else {
+		            // found the correct leaf & we have enough space left
                     LeafNode *leaf = reinterpret_cast<LeafNode *>(node);
                     leaf->insert(key, tid);
 
-                    if (bufferFrameOfParent != nullptr) {
+                    if (bufferFrameOfParent != nullptr)
                         bufferManager.unfixPage(bufferFrameOfParent, bufferFrameOfParentIsDirty);
-                    }
 
                     bufferManager.unfixPage(bufferFrame, true);
                     return;
