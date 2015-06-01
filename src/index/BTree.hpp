@@ -96,7 +96,6 @@ class BTree : public Segment {
                     children[index] = child;
                     return;
                 } else {
-                    // move existing entries
                     memmove(keys + index + 1, keys + index, (this->count - index - 1) * sizeof(K));
                     memmove(children + index + 2, children + index + 1, (this->count - index - 1) * sizeof(uint64_t));
                 }
@@ -116,7 +115,6 @@ class BTree : public Segment {
             if (index == this->count)
                 return false;
 
-            // move existing entries
             memmove(keys + index, keys + index + 1, (this->count - index - 1) * sizeof(K));
             memmove(children + index, children + index + 1, (this->count - index - 1) * sizeof(uint64_t));
             this->count--;
@@ -184,9 +182,8 @@ class BTree : public Segment {
         bool getTID(K key, TID &tid) {
             auto index = getKeyIndex(key);
 
-            if (index == this->count || cmp(key, keys[index])) {
+            if (index == this->count || cmp(key, keys[index])) 
                 return false;
-            }
 
             tid = tids[index];
             return true;
@@ -198,18 +195,15 @@ class BTree : public Segment {
          */
         void insert(K key, TID tid) {
             auto index = getKeyIndex(key);
-            if (index < this->count) {
-                if (!cmp(key, keys[index])) { // existing key?
-                    tids[index] = tid; // overwrite existing value
-                    return;
-                }
+            if (index < this->count && !cmp(key, keys[index])) {
+            	tids[index] = tid; 
+                return;
             }
 
-            // move existing entries which are on the right of the new element
             memmove(keys + index + 1, keys + index, (this->count - index) * sizeof(K));
             memmove(tids + index + 1, tids + index, (this->count - index) * sizeof(TID));
-            // insert new entry
-            keys[index] = key;
+            
+	    keys[index] = key;
             tids[index] = tid;
             this->count++;
         }
@@ -248,7 +242,7 @@ class BTree : public Segment {
             std::move(keysSecondHalf, keysSecondHalf + middle, newLeaf->keys);
             std::move(tidsSecondHalf, tidsSecondHalf + middle, newLeaf->tids);
 
-            return maximumKey();
+            return this->maximumKey();
         }
     };
 
@@ -275,7 +269,7 @@ public:
      * The second parameter TID is given a reference to the found tuple.
      */
     bool lookup(K key, TID &tid) {
-        BufferFrame *bufferFrame = findLeaf(key, false);
+        BufferFrame *bufferFrame = getLeaf(key, false);
         LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
         auto found = leaf->getTID(key, tid);
         bufferManager.unfixPage(bufferFrame, false);
@@ -351,19 +345,8 @@ public:
                 node = static_cast<Node *>(bufferFrame->getData());
 
             } else {
-                if (node->isLeaf()) {
-                    // found the correct leaf & we have enough space left
-                    LeafNode *leaf = reinterpret_cast<LeafNode *>(node);
-                    leaf->insert(key, tid);
-
-                    if (bufferFrameOfParent != nullptr) {
-                        bufferManager.unfixPage(bufferFrameOfParent, bufferFrameOfParentIsDirty);
-                    }
-
-                    bufferManager.unfixPage(bufferFrame, true);
-                    return;
-                } else {
-                    // traverse without splitting
+                if (!node->isLeaf()) {
+		    // traverse without splitting
                     InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
                     uint64_t nextID = innerNode->getChild(key);
 
@@ -379,6 +362,17 @@ public:
                     bufferFrameIsDirty = false;
 
                     node = static_cast<Node *>(bufferFrame->getData());
+		} else {
+		    // found the correct leaf & we have enough space left
+                    LeafNode *leaf = reinterpret_cast<LeafNode *>(node);
+                    leaf->insert(key, tid);
+
+                    if (bufferFrameOfParent != nullptr) {
+                        bufferManager.unfixPage(bufferFrameOfParent, bufferFrameOfParentIsDirty);
+                    }
+
+                    bufferManager.unfixPage(bufferFrame, true);
+                    return;
                 }
             }
         }
@@ -389,7 +383,7 @@ public:
      * We ignore underfull nodes/leafs.
      */
     bool erase(K key) {
-        BufferFrame *bufferFrame = findLeaf(key, false);
+        BufferFrame *bufferFrame = getLeaf(key, false);
         LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
 
         auto found = leaf->remove(key);
@@ -422,7 +416,7 @@ private:
      * If lock is true, the page of the current node will be held exclusively.
      * The function returns a pointer to the bufferFrame of the leaf node.
      */
-    BufferFrame *findLeaf(K &key, bool lock) {
+    BufferFrame *getLeaf(K &key, bool lock) {
         // Start with the root
         BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), lock);
         Node *node = static_cast<Node *>(bufferFrame->getData());
