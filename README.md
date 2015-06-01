@@ -38,5 +38,5 @@ $ ./bin/btreeTest <numberOfElements>
 ```
 for example:
 ```bash
-$ ./bin/btreeTest 10000
+$ ./bin/btreeTest 100000
 ```
