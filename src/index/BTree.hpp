@@ -91,18 +91,15 @@ class BTree : public Segment {
         void insert(K key, uint64_t child) {
             auto index = getKeyIndex(key);
 
-            if (index < this->count - 1) {
-                if (!cmp(key, keys[index])) {
-                    children[index] = child;
-                    return;
-                } else {
-                    memmove(keys + index + 1, keys + index, (this->count - index - 1) * sizeof(K));
-                    memmove(children + index + 2, children + index + 1, (this->count - index - 1) * sizeof(uint64_t));
-                }
+            if (index < this->count - 1 && !cmp(key, keys[index])) {
+            	children[index] = child;
+                return;
             }
 
-            // insert new entry
-            keys[index] = key;
+	    memmove(keys + index + 1, keys + index, (this->count - index - 1) * sizeof(K));
+            memmove(children + index + 2, children + index + 1, (this->count - index - 1) * sizeof(uint64_t));
+            
+	    keys[index] = key;
             children[index + 1] = child;
             this->count++;
         }
