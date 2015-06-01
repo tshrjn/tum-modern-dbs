@@ -10,11 +10,6 @@
 #include <algorithm> // lower_bound
 #include <iostream>
 
-/**
- * @TODO: (SHOULD) Cleanup when leaf becomes empty (free page). We don't need to implement rebalancing, though.
- * Or maybe just recreate tree when there are too many empty pages...
- * @TODO: (OPTIONAL) Write a test suite for multiple threads....
- */
 
 template<class K, class CMP = std::less<K> >
 class BTree : public Segment {
@@ -291,7 +286,6 @@ public:
         bool bufferFrameOfParentIsDirty = false;
 
         while (true) {
-            // @TODO: Big blob of code, break it up into functions?
             if (node->isFull()) {
                 // we need to create a new node
                 uint64_t newPageID = ++this->size;
