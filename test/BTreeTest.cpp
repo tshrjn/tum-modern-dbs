@@ -108,6 +108,60 @@ void test(uint64_t n) {
         bTree.erase(getKey<T>(i));
 
     assert(bTree.getNumberOfEntries() == 0);
+
+
+    // Test #2, make sure empty pages of leafs are reused before acquiring new pages
+    // Insert n - 2n valus
+    for (uint64_t i = n; i < 2*n; ++i)
+        bTree.insert(getKey<T>(i), TID(i*i));
+
+    assert(bTree.getNumberOfEntries() == n);
+
+    // Check if they can be retrieved
+    for (uint64_t i = n; i < 2*n; ++i) {
+        TID tid;
+        std::cout << "lookup check " << i << std::endl;
+        assert(bTree.lookup(getKey<T>(i), tid));
+        std::cout << tid.getValue() << "==" << TID(i*i).getValue() << std::endl;
+        assert(tid == (TID(i*i)));
+    }
+
+    // Now insert the old values back again
+    for (uint64_t i = 0; i < n; ++i)
+        bTree.insert(getKey<T>(i), TID(i*i));
+
+    assert(bTree.getNumberOfEntries() == 2*n);
+
+    // Check if they can be retrieved
+    for (uint64_t i = 0; i < 2*n; ++i) {
+        TID tid;
+        std::cout << "lookup check " << i << std::endl;
+        assert(bTree.lookup(getKey<T>(i), tid));
+        std::cout << tid.getValue() << "==" << TID(i*i).getValue() << std::endl;
+        assert(tid == (TID(i*i)));
+    }
+
+    // Delete some values
+    for (uint64_t i = 0; i < 2*n; ++i)
+        if ((i % 7) == 0)
+            bTree.erase(getKey<T>(i));
+
+    // Check if the right ones have been deleted
+    for (uint64_t i = 0; i < 2*n; ++i) {
+        TID tid(i*i);
+        if ((i % 7) == 0) {
+            assert(!bTree.lookup(getKey<T>(i), tid));
+        } else {
+            assert(bTree.lookup(getKey<T>(i), tid));
+            assert(tid.getValue() == i*i);
+        }
+    }
+
+    // Delete everything
+    for (uint64_t i = 0; i < 2*n; ++i)
+        bTree.erase(getKey<T>(i));
+
+    assert(bTree.getNumberOfEntries() == 0);
 }
 
 int main(int argc, char *argv[]) {

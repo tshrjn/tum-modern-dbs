@@ -9,6 +9,7 @@
 #include <string.h> // memcpy
 #include <algorithm> // lower_bound
 #include <iostream>
+#include <list>
 
 
 template<class K, class CMP = std::less<K> >
@@ -23,6 +24,10 @@ class BTree : public Segment {
     public:
         inline bool isLeaf() {
             return leaf;
+        }
+
+        bool empty() {
+            return count == 0;
         }
 
         virtual bool isFull() = 0;
@@ -117,6 +122,26 @@ class BTree : public Segment {
             this->count--;
             return true;
         }
+
+        /**
+         * Invalidates the child of a separator key (set to -1).
+         */
+        bool invalidate(K key) {
+            auto index = getKeyIndex(key);
+            if (index == this->count)
+                return false;
+
+            children[index] = -1;
+            return true;
+        }
+
+        /**
+         * When an invalidatd separator needs to be activated again,
+         * set the page id of the new leaf.
+         */
+        void reactivate(K key, uint64_t child) {
+            children[getKeyIndex(key)] = child;
+        };
 
         /**
          * Split an inner node and return the separator key that should be inserted into the parent.
@@ -266,7 +291,25 @@ public:
      * The second parameter TID is given a reference to the found tuple.
      */
     bool lookup(K key, TID &tid) {
-        BufferFrame *bufferFrame = getLeaf(key, false);
+        BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), false);
+        Node *node = static_cast<Node *>(bufferFrame->getData());
+
+        // Traverse to the leaf
+        while (!node->isLeaf()) {
+            InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
+            auto nextID = innerNode->getChild(key);
+
+            // Hit an invalidated child meaning the key doesn't exist
+            if (nextID == -1)
+                return false;
+
+            BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), false);
+
+            bufferManager.unfixPage(bufferFrame, false);
+            bufferFrame = bufferFrameOfChild;
+
+            node = static_cast<Node *>(bufferFrame->getData());
+        }
         LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
         auto found = leaf->getTID(key, tid);
         bufferManager.unfixPage(bufferFrame, false);
@@ -292,7 +335,7 @@ public:
 
         while (true) {
             if (node->isFull()) {
-                uint64_t newPageID = ++this->size;
+                auto newPageID = this->getFreePage();
                 BufferFrame *newBufferFrame = bufferManager.fixPage(PID(segmentId, newPageID), true);
 
                 K separator;
@@ -311,7 +354,7 @@ public:
                     parentNode->insert(separator, newBufferFrame->getPageID().getPage());
                 } else {
                     // move the old root, create new root and attach old root
-                    uint64_t movedOldRootID = ++this->size;
+                    auto movedOldRootID = this->getFreePage();
                     BufferFrame *movedOldRootBufferFrame = bufferManager.fixPage(PID(segmentId, movedOldRootID), true);
                     memcpy(movedOldRootBufferFrame->getData(), bufferFrame->getData(), BufferFrame::frameSize);
 
@@ -337,7 +380,21 @@ public:
                 if (!node->isLeaf()) {
 		            // traverse without splitting
                     InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
-                    uint64_t nextID = innerNode->getChild(key);
+                    auto nextID = innerNode->getChild(key);
+
+                    // Hit an invalidated separator, meaning we need to recreate the leaf on a new page
+                    if (nextID == -1) {
+                        auto nextID = this->getFreePage();
+                        auto newBufferFrame = bufferManager.fixPage(PID(segmentId, nextID), true);
+                        auto leaf = new(newBufferFrame->getData()) LeafNode();
+                        innerNode->reactivate(key, nextID);
+                        leaf->insert(key, tid);
+                        bufferManager.unfixPage(newBufferFrame, true);
+                        if (bufferFrameOfParent != nullptr)
+                            bufferManager.unfixPage(bufferFrameOfParent, false);
+                        bufferManager.unfixPage(bufferFrame, true);
+                        return;
+                    }
 
                     BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), true);
                     if (bufferFrameOfParent != nullptr)
@@ -367,16 +424,56 @@ public:
 
     /**
      * Deletes an entry from a B-Tree.
-     * We ignore underfull nodes/leafs.
+     * We ignore underfull nodes, but clean up empty leaf pages in order to reuse them.
      */
     bool erase(K key) {
-        BufferFrame *bufferFrame = getLeaf(key, false);
+        // Start with the root
+        BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), true);
+        Node *node = static_cast<Node *>(bufferFrame->getData());
+        BufferFrame *bufferFrameOfParent = nullptr;
+
+        // Traverse to the leaf
+        while (!node->isLeaf()) {
+            InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
+            auto nextID = innerNode->getChild(key);
+
+            // Hit an invalidated separator, meaning the key no longer exists
+            if (nextID == -1) {
+                bufferManager.unfixPage(bufferFrame, false);
+                if (bufferFrameOfParent != nullptr)
+                    bufferManager.unfixPage(bufferFrameOfParent, false);
+                return false;
+            }
+
+            BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), true);
+
+            if (bufferFrameOfParent != nullptr)
+                bufferManager.unfixPage(bufferFrameOfParent, false);
+
+            bufferFrameOfParent = bufferFrame;
+            bufferFrame = bufferFrameOfChild;
+
+            node = static_cast<Node *>(bufferFrame->getData());
+        }
+
+        // found the leaf, delete entry
         LeafNode *leaf = static_cast<LeafNode *>(bufferFrame->getData());
-
         auto found = leaf->remove(key);
-        if (found)
-            this->numberOfEntries--;
 
+        if (found) {
+            this->numberOfEntries--;
+            if (leaf->empty()) {
+                // invalid separator of parent so that page can be reused.
+                if (bufferFrameOfParent != nullptr) {
+                    auto innerNode = static_cast<InnerNode *>(bufferFrameOfParent->getData());
+                    innerNode->invalidate(key);
+                }
+                freedPages.push_back(bufferFrame->getPageID().getPage());
+            }
+        }
+
+        if (bufferFrameOfParent != nullptr)
+            bufferManager.unfixPage(bufferFrameOfParent, false);
         bufferManager.unfixPage(bufferFrame, found);
         return found;
     };
@@ -398,31 +495,25 @@ private:
      */
     size_t numberOfEntries;
 
+
     /**
-     * Helper function to traverse down to the correct leaf given a key.
-     * If lock is true, the page of the current node will be held exclusively.
-     * The function returns a pointer to the bufferFrame of the leaf node.
+     * List of pages that were used once, but aren't anymore.
      */
-    BufferFrame *getLeaf(K &key, bool lock) {
-        // Start with the root
-        BufferFrame *bufferFrame = bufferManager.fixPage(PID(segmentId, root), lock);
-        Node *node = static_cast<Node *>(bufferFrame->getData());
+    std::list<uint64_t> freedPages;
 
-        // Traverse to the leaf
-        while (!node->isLeaf()) {
-            InnerNode *innerNode = reinterpret_cast<InnerNode *>(node);
-            uint64_t nextID = innerNode->getChild(key);
-
-            BufferFrame *bufferFrameOfChild = bufferManager.fixPage(PID(segmentId, nextID), true);
-
-            bufferManager.unfixPage(bufferFrame, false);
-            bufferFrame = bufferFrameOfChild;
-
-            node = static_cast<Node *>(bufferFrame->getData());
+    /**
+     * Get the next page id that should be used. Try to reuse an
+     * emptied leaf page before acquiring new pages.
+     */
+    uint64_t getFreePage() {
+        if (!freedPages.empty()) {
+            auto page = freedPages.front();
+            freedPages.pop_front();
+            return page;
         }
-
-        return bufferFrame;
+        return ++this->size;
     }
-};
+
+ };
 
 #endif //BTREE_HPP
