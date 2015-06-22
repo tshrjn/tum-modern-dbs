@@ -44,14 +44,14 @@ bool HashJoin::next() {
          table.insert(make_pair(*leftValue,move(values)));
       }
       if (table.empty()) return false;
-      iter=iterLimit=table.end();
+      iter=limit=table.end();
    }
 
    while (true) {
       // AFTER equal_range found a range of equal keys the tuples are produced iteratively
       // Until the lower iterator hits the upper border again
       // Meanwhile the right values stay untouched
-      if (iter!=iterLimit) {
+      if (iter!=limit) {
          const vector<Register>& values=(*iter).second;
          auto iterValues=values.begin();
          // Copy the found values to the result registers
@@ -71,7 +71,7 @@ bool HashJoin::next() {
       auto leftRange=table.equal_range(*rightValue);
 
       // The next tuple will be the range.first and right
-      iter=leftRange.first; iterLimit=leftRange.second;
+      iter=leftRange.first; limit=leftRange.second;
    }
 }
 

@@ -27,15 +27,15 @@ bool Selection::next() {
          return false;
       // Check
       if (equal) {
-         if (condition->getState()==equal->getState()) switch (condition->getState()) {
-            case Register::State::Unbound: break;
-            case Register::State::Int: if (condition->getInt()==equal->getInt()) return true; break;
-            case Register::State::Double: if (condition->getDouble()==equal->getDouble()) return true; break;
-            case Register::State::Bool: if (condition->getBool()==equal->getBool()) return true; break;
-            case Register::State::String: if (condition->getString()==equal->getString()) return true; break;
+         if (condition->getType()==equal->getType()) switch (condition->getType()) {
+            case Register::Type::Undefined: break;
+            case Register::Type::Int: if (condition->getInt()==equal->getInt()) return true; break;
+            case Register::Type::Double: if (condition->getDouble()==equal->getDouble()) return true; break;
+            case Register::Type::Bool: if (condition->getBool()==equal->getBool()) return true; break;
+            case Register::Type::String: if (condition->getString()==equal->getString()) return true; break;
          }
       } else {
-         if ((condition->getState()==Register::State::Bool)&&(condition->getBool()))
+         if ((condition->getType()==Register::Type::Bool)&&(condition->getBool()))
             return true;
       }
    }

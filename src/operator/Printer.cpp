@@ -26,12 +26,12 @@ bool Printer::next() {
    for (unsigned index=0,limit=toPrint.size();index<limit;++index) {
       if (index) cout << ' ';
       const Register& r=*toPrint[index];
-      switch (r.getState()) {
-         case Register::State::Unbound: cout << "null"; break;
-         case Register::State::Int: cout << r.getInt(); break;
-         case Register::State::Double: cout << r.getDouble(); break;
-         case Register::State::Bool: cout << (r.getBool()?"true":"false"); break;
-         case Register::State::String: cout << r.getString(); break;
+      switch (r.getType()) {
+         case Register::Type::Undefined: cout << "null"; break;
+         case Register::Type::Int: cout << r.getInt(); break;
+         case Register::Type::Double: cout << r.getDouble(); break;
+         case Register::Type::Bool: cout << (r.getBool()?"true":"false"); break;
+         case Register::Type::String: cout << r.getString(); break;
       }
    }
    cout << endl;
