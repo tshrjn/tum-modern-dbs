@@ -42,10 +42,7 @@ bool Selection::next() {
                         if (condition->getString() == equal->getString()) return true;
                         break;
                 }
-        } else {
-            if ((condition->getType() == Register::Type::Bool) && (condition->getBool()))
-                return true;
-        }
+        } 
     }
 }
 

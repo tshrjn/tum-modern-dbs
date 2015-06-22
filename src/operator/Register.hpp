@@ -7,7 +7,7 @@ class Register {
 public:
 
     enum class Type : unsigned {
-        Int, Double, Bool, String, Undefined
+        Int, String, Undefined
     };
 
 private:
