@@ -4,21 +4,24 @@
 #include "operator/Operator.hpp"
 #include <memory>
 
-class Selection : public Operator
-{
-   private:
-   std::unique_ptr<Operator> input;
-   const Register* condition;
-   const Register* equal;
+class Selection : public Operator {
+private:
+    std::unique_ptr <Operator> input;
+    const Register *condition;
+    const Register *equal;
 
-   public:
-   Selection(std::unique_ptr<Operator>&& input, const Register* a, const Register* b);
-   ~Selection();
+public:
+    Selection(std::unique_ptr <Operator> &&input, const Register *a, const Register *b);
 
-   void open();
-   bool next();
-   void close();
+    ~Selection();
 
-   std::vector<const Register*> getOutput() const;
+    void open();
+
+    bool next();
+
+    void close();
+
+    std::vector<const Register *> getOutput() const;
 };
+
 #endif

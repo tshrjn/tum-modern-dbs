@@ -4,47 +4,55 @@
 using namespace std;
 
 Selection::Selection(
-   unique_ptr<Operator>&& input,
-   const Register* a,
-   const Register* b)
-   : input(move(input)),
-      condition(a),
-      equal(b) {
+        unique_ptr < Operator > && input,
+const
+Register *a,
+const Register *b
+)
+:
+
+input(move(input)),
+condition(a),
+equal(b) {
 }
 
-Selection::~Selection() {}
+Selection::~Selection() { }
 
 
 void Selection::open() {
-   input->open();
+    input->open();
 }
 
 
 bool Selection::next() {
-   while (true) {
-      // Produce a tuple
-      if (!input->next())
-         return false;
-      // Check
-      if (equal) {
-         if (condition->getType()==equal->getType()) switch (condition->getType()) {
-            case Register::Type::Undefined: break;
-            case Register::Type::Int: if (condition->getInt()==equal->getInt()) return true; break;
-            case Register::Type::Double: if (condition->getDouble()==equal->getDouble()) return true; break;
-            case Register::Type::Bool: if (condition->getBool()==equal->getBool()) return true; break;
-            case Register::Type::String: if (condition->getString()==equal->getString()) return true; break;
-         }
-      } else {
-         if ((condition->getType()==Register::Type::Bool)&&(condition->getBool()))
-            return true;
-      }
-   }
+    while (true) {
+        // Produce a tuple
+        if (!input->next())
+            return false;
+        // Check
+        if (equal) {
+            if (condition->getType() == equal->getType())
+                switch (condition->getType()) {
+                    case Register::Type::Undefined:
+                        break;
+                    case Register::Type::Int:
+                        if (condition->getInt() == equal->getInt()) return true;
+                        break;
+                    case Register::Type::String:
+                        if (condition->getString() == equal->getString()) return true;
+                        break;
+                }
+        } else {
+            if ((condition->getType() == Register::Type::Bool) && (condition->getBool()))
+                return true;
+        }
+    }
 }
 
 void Selection::close() {
-   input->close();
+    input->close();
 }
 
-vector<const Register*> Selection::getOutput() const {
-   return input->getOutput();
+vector<const Register *> Selection::getOutput() const {
+    return input->getOutput();
 }
