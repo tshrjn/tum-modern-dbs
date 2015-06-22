@@ -3,6 +3,7 @@ include src/buffer/LocalMakefile
 include src/schema/LocalMakefile
 include src/segment/LocalMakefile
 include src/index/LocalMakefile
+include src/operator/LocalMakefile
 
 bin/%.o: src/%.cpp 
 	$(CHECKDIR)

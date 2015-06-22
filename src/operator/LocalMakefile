@@ -1,0 +1,7 @@
+bin/operator/%.o: src/operator/%.cpp 
+	$(CHECKDIR)
+	$(CC) -o$@ -c $(CXXFLAGS) $<
+
+obj_operator:=bin/operator/HashJoin.o bin/operator/Operator.o bin/operator/Printer.o \
+	bin/operator/Projection.o bin/operator/Register.o bin/operator/Selection.o \
+	bin/operator/Tablescan.o
