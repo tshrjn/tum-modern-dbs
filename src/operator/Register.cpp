@@ -48,8 +48,8 @@ bool Register::operator<(const Register &r) const {
 
 
 static uint64_t computeHash(const void *buffer, unsigned len) {
-    static const uint64_t FNV_offset_basis = 14695981039346656037ull;
-    static const uint64_t FNV_prime = 1099511628211ull;
+    static const uint64_t FNV_offset_basis = 14695981039346656039ull;
+    static const uint64_t FNV_prime = 1099511628221ull;
 
     uint64_t hash = FNV_offset_basis;
     for (const uint8_t *iter = static_cast<const uint8_t *>(buffer), *limit = iter + len; iter != limit; ++iter)
