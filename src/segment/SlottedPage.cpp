@@ -14,22 +14,27 @@ SlottedPage::~SlottedPage() {
 
 }
 
+// The current free space is the difference between the upper slot bound
+// And the space that is occupied by the slots
 uint16_t SlottedPage::getCurrentFreeSpace() {
 	auto lower = header.numberSlots * sizeof(Slot);
 	auto upper = header.dataOffset;
 	return upper - lower;
 }
 
+// The compactedFreeSpace adds the space that can be gained when one plays a bit slot tetris
 uint16_t SlottedPage::getCompactedFreeSpace() {
 	auto current = getCurrentFreeSpace();
 	return current + header.fragmentedSpace;
 }
 
+// Check if the dataSize can be allocated
 bool SlottedPage::canAllocateSlot(uint16_t dataSize) {
 	auto requiredSpace = dataSize + sizeof(Slot);
 	return getCompactedFreeSpace() >= requiredSpace;
 }
 
+// Check if the slot can be resized
 bool SlottedPage::canReallocateSlot(uint16_t slotId, uint16_t dataSize) {
 	auto requiredSpace = dataSize;
 	return getCompactedFreeSpace() + slots[slotId].length >= requiredSpace;

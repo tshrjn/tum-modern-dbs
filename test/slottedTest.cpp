@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
 
       // Replace old with new value
       auto rec = new Record(s.size(), s.c_str());
-      sp.update(tid, rec);
+      assert(sp.update(tid, rec));
       delete(rec);
       values[tid]=r;
    }
@@ -134,8 +134,10 @@ int main(int argc, char** argv) {
       const std::string& value = testData[p.second];
       unsigned len = value.size();
       Record* rec = sp.lookup(tid);
-      assert(rec->getLen() == len);
 
+      std::cout << rec->getLen() << " should equal " << len << std::endl;
+
+      assert(rec->getLen() == len);
       assert(memcmp(rec->getData(), value.c_str(), len)==0);
    }
 

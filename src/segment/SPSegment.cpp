@@ -92,6 +92,8 @@ bool SPSegment::update(TID tid, Record* r) {
 
 	} else {
 		if(!page->canReallocateSlot(slotId, bufferSize)) {
+			std::cout << "SPSegment.update could not allocate size " << bufferSize << " (from " << oldRecord->getLen() << ")" << std::endl;
+
 			bufferManager.unfixPage(frame, false);
 			return false;
 		}

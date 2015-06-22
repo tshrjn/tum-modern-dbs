@@ -27,12 +27,20 @@ struct TestStruct8 {
 
 struct TestStruct4096 {
 	char dummyData[4096];
-	TestStruct4096() {}
+	TestStruct4096(char x) {
+		for(int i = 0; i < 4096; i++) {
+			dummyData[i] = x;
+		}
+	}
 };
 
 struct TestStruct6144 {
 	char dummyData[6144];
-	TestStruct6144() {}
+	TestStruct6144(char x) {
+		for(int i = 0; i < 6144; i++) {
+			dummyData[i] = x;
+		}
+	}
 };
 
 int main(int argc, char* argv[]) {
@@ -59,8 +67,17 @@ int main(int argc, char* argv[]) {
 		sut1.storeData(slotId, (char*)(new TestStruct4(i, i/2)));
 	}
 
-	assert(!sut1.canAllocateSlot(sizeof(TestStruct4)));
+	// Test subsequent retrieval
+	std::cout << "SlottedPageTest: Test subsequent read" << std::endl;
+	for(int i = 0; i < 2047; i++) {
+		char* data = sut1.getData(i);
+		TestStruct4* testStruct = (TestStruct4*) data;
+		assert(testStruct->a == i);
+		assert(testStruct->b == i/2);
+	}
 
+	// Check if the page is full now
+	assert(!sut1.canAllocateSlot(sizeof(TestStruct4)));
 	assert(sut1.getCurrentFreeSpace() == 0);
 	assert(sut1.getCompactedFreeSpace() == 0);
 	std::cout << "SlottedPageTest: Test successfull" << std::endl;
@@ -84,8 +101,16 @@ int main(int argc, char* argv[]) {
 		sut2.storeData(slotId, (char*)(new TestStruct8(i, i/2)));
 	}
 
-	assert(!sut2.canAllocateSlot(sizeof(TestStruct8)));
+	// Test subsequent retrieval
+	std::cout << "SlottedPageTest: Test subsequent read" << std::endl;
+	for(int i = 0; i < 1364; i++) {
+		char* data = sut2.getData(i);
+		TestStruct8* testStruct = (TestStruct8*) data;
+		assert(testStruct->a == i);
+		assert(testStruct->b == i/2);
+	}
 
+	assert(!sut2.canAllocateSlot(sizeof(TestStruct8)));
 	auto stored = 1364 * sizeof(TestStruct8);
 	auto remaining = SlottedPage::dataSize - stored - (1364 * 4); 
 	assert(sut2.getCurrentFreeSpace() == remaining);
@@ -101,15 +126,37 @@ int main(int argc, char* argv[]) {
 	assert(sut3.canAllocateSlot(sizeof(TestStruct4096)));
 	assert(sut3.canAllocateSlot(sizeof(TestStruct4096)));
 	auto sut3_1 = sut3.allocateSlot(sizeof(TestStruct4096));
+	sut3.storeData(sut3_1, (char*)(new TestStruct4096((char) 1)));
 	auto sut3_2 = sut3.allocateSlot(sizeof(TestStruct4096));
+	sut3.storeData(sut3_2, (char*)(new TestStruct4096((char) 2)));
+
 	// 2 * 4096 - 2 slots - 1 header - 1 new slot
 	auto used = sizeof(TestStruct4096) * 2 + SlottedPage::slotSize * 2;
 	auto free = SlottedPage::dataSize - used;
 	assert(sut3.getCurrentFreeSpace() == free);
 	assert(sut3.canReallocateSlot(sut3_1, sizeof(TestStruct6144)));
-	sut3.allocateSlot(sizeof(TestStruct4096));
+	auto sut3_3 = sut3.allocateSlot(sizeof(TestStruct4096));
+	sut3.storeData(sut3_3, (char*)(new TestStruct4096((char) 3)));
+
+	// reallocate
 	assert(sut3.canReallocateSlot(sut3_1, sizeof(TestStruct6144)));
 	sut3.reallocateSlot(sut3_1, sizeof(TestStruct6144));
+	sut3.storeData(sut3_1, (char*)(new TestStruct6144((char) 1)));
+
+	// check if data is corrent
+	char* sut3_1_data_1 = (char*)sut3.getData(sut3_1);
+	char* sut3_2_data_1 = (char*)sut3.getData(sut3_2);
+	char* sut3_3_data_1 = (char*)sut3.getData(sut3_3);
+	for(int i=0; i<6144; i++) {
+		assert(sut3_1_data_1[i] == (char)1);
+	}
+	for(int i=0; i<4096; i++) {
+		assert(sut3_2_data_1[i] == (char)2);
+		assert(sut3_3_data_1[i] == (char)3);
+	}
+	std::cout << "SlottedPageTest: Read successfull" << std::endl;
+
+	// check free space
 	used = sizeof(TestStruct4096) * 2 + sizeof(TestStruct6144)+ SlottedPage::slotSize * 3;
 	free = SlottedPage::dataSize - used;
 	assert(sut3.getCurrentFreeSpace() == free);
@@ -129,7 +176,22 @@ int main(int argc, char* argv[]) {
 	*/
 	std::cout << "SlottedPageTest: Testing allocation with compactify" << std::endl;
 	assert(sut3.canAllocateSlot(sizeof(TestStruct4096)));
-	sut3.allocateSlot(sizeof(TestStruct4096));
+	auto sut3_4 = sut3.allocateSlot(sizeof(TestStruct4096));
+	sut3.storeData(sut3_4, (char*)(new TestStruct4096((char) 4)));
+
+	// check if data is corrent
+	char* sut3_1_data_2 = (char*)sut3.getData(sut3_1);
+	char* sut3_3_data_2 = (char*)sut3.getData(sut3_3);
+	char* sut3_4_data_2 = (char*)sut3.getData(sut3_4);
+	for(int i=0; i<6144; i++) {
+		assert(sut3_1_data_2[i] == (char)1);
+	}
+	for(int i=0; i<4096; i++) {
+		assert(sut3_3_data_2[i] == (char)3);
+		assert(sut3_4_data_2[i] == (char)4);
+	}
+	std::cout << "SlottedPageTest: Read successfull" << std::endl;
+
 	assert(sut3.getCurrentFreeSpace() == free - SlottedPage::slotSize);
 	assert(sut3.getCompactedFreeSpace() == free - SlottedPage::slotSize);
 	std::cout << "SlottedPageTest: Test successfull" << std::endl;
