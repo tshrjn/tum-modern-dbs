@@ -40,3 +40,11 @@ for example:
 ```bash
 $ ./bin/btreeTest 100000
 ```
+
+## Assignment 04
+
+Run with:
+```bash
+$ make all
+$ ./bin/operatorTest
+```
