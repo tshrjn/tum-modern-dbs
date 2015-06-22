@@ -4,16 +4,16 @@
 #include <memory>
 #include <vector>
 
-#include "../src/schema/Types.cpp"
-#include "../src/buffer/BufferManager.hpp"
-#include "../src/schema/Schema.hpp"
-#include "../src/segment/SPSegment.hpp"
-#include "../src/operator/Register.hpp"
-#include "../src/operator/HashJoin.hpp"
-#include "../src/operator/Printer.hpp"
-#include "../src/operator/Projection.hpp"
-#include "../src/operator/Selection.hpp"
-#include "../src/operator/TableScan.hpp"
+#include "schema/Types.cpp"
+#include "buffer/BufferManager.hpp"
+#include "schema/Schema.hpp"
+#include "segment/SPSegment.hpp"
+#include "operator/Register.hpp"
+#include "operator/HashJoin.hpp"
+#include "operator/Printer.hpp"
+#include "operator/Projection.hpp"
+#include "operator/Selection.hpp"
+#include "operator/TableScan.hpp"
 
 const std::vector<std::string> names = {
         "Philip",
