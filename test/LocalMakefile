@@ -30,4 +30,4 @@ bin/btreeTest: bin/test/BTreeTest.o $(obj_buffer) $(obj_schema) $(obj_segment) $
 	$(BUILDEXE) -pthread
 
 bin/operatorTest: bin/test/operatorTest.o $(obj_buffer) $(obj_schema) $(obj_segment) $(obj_index) $(obj_operator)
-	$(BUILDEXE)
+	$(BUILDEXE) -pthread

@@ -7,7 +7,7 @@
 #include "segment/SlottedPage.hpp"
 #include <iostream>
 
-class SPSegment : Segment {
+class SPSegment : public Segment {
 private:
     uint64_t numberPages = 0;
 
