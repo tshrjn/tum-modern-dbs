@@ -20,7 +20,7 @@ class TableScan : public Operator {
     uint64_t lastID;
 
     SlottedPage *currentSlottedPage;
-    uint32_t currentSlotID;
+    uint16_t currentSlotID;
 
     std::vector<const Register *> registers;
     std::vector<Schema::Relation::Attribute> attributes;

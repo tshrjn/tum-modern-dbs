@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     relation.attributes.push_back(attributeName);
 
     // Fill Relation with some values
-    auto recordSize = 2 * sizeof(int64_t) + 32;
+    auto recordSize = 2 * sizeof(int64_t) + 50;
     auto recordCount = 10;
     for (int64_t i = 0; i < recordCount; ++i) {
         char data[recordSize];
@@ -89,22 +89,26 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Test table scan..." << std::endl;
     // Test TableScan
-    TableScan ts(relation, spSegment, bufferManager);
-    ts.open();
-    int64_t j = 0;
-    while (ts.next()) {
-        std::vector<const Register *> registers = ts.getOutput();
+    TableScan tableScan(relation, spSegment, bufferManager);
+    tableScan.open();
+    auto j = 0, count = 0;
+    while (tableScan.next()) {
+        std::vector<const Register *> registers = tableScan.getOutput();
         assert(registers.size() == 3);
         assert(registers[0]->getType() == Types::Tag::Integer);
+        std::cout << registers[0]->getInt() << " = " << j << std::endl;
         assert(registers[0]->getInt() == j);
         assert(registers[1]->getType() == Types::Tag::Integer);
+        std::cout << registers[1]->getInt() << " = " << 2 * recordCount - j << std::endl;
         assert(registers[1]->getInt() == 2 * recordCount - j);
         assert(registers[2]->getType() == Types::Tag::Char);
+        std::cout << registers[2]->getString() << " = " << names[j % names.size()] << std::endl;
         assert(registers[2]->getString().compare(names[j % names.size()]) == 0);
         j++;
     }
     assert(j == recordCount);
-    ts.close();
+    tableScan.close();
 
+    std::cout << "TEST SUCCESSFUL!" << std::endl;
     return 0;
 }

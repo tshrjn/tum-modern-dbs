@@ -157,6 +157,7 @@ void SlottedPage::updateFirstSlot() {
 		}
 		newFirst++;
 	}
+
 	// when the while loop finishes newFirst points to the first byte after the original array
 	// extend the array by one
 	header.numberSlots++;
