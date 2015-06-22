@@ -32,23 +32,24 @@ bool TableScan::next() {
         }
 
         // loop over the slots of the current page
-        // TODO: GET NUMBER OF SLOTS : currentSlotID < slottedPage->getSlotCount()
-        while (currentSlotID < 5) {
+        // Done: GET NUMBER OF SLOTS : currentSlotID < slottedPage->getSlotCount()
+        while (currentSlotID < currentSlottedPage->getNumberSlots()) {
             auto slot = currentSlottedPage->getData(currentSlotID);
             ++currentSlotID;
 
-            // TODO: HOW TO SKIP OVER FREE / INDIRECTION SLOTS
-
-            // all types have fixed length
-            char *recordPtr = slot;
-            off_t recordOffset = 0;
-            for (int i = 0; i < registers.size(); ++i) {
-                Register *reg = new Register;
-                reg->load(attributes[i].type, recordPtr + recordOffset);
-                registers[i] = reg;
-                recordOffset += attributes[i].len;
+            // Done: HOW TO SKIP OVER FREE / INDIRECTION SLOTS
+            if(!currentSlottedPage->slotIsEmpty(currentSlotID)) {
+                // all types have fixed length
+                char *recordPtr = slot;
+                off_t recordOffset = 0;
+                for (int i = 0; i < registers.size(); ++i) {
+                    Register *reg = new Register;
+                    reg->load(attributes[i].type, recordPtr + recordOffset);
+                    registers[i] = reg;
+                    recordOffset += attributes[i].len;
+                }
+                return true;
             }
-            return true;
         }
 
         // reach end of page

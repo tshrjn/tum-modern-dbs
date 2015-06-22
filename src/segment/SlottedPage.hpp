@@ -121,5 +121,11 @@ public:
 	// The lower 4 bits of the returned byte represent the logarithmic free space of the page
 	// (not used at the moment)
 	char getFreeSpaceNibble(bool upper);
+
+	// Return number of slots
+	uint16_t getNumberSlots() { return header.numberSlots; }
+
+	// Check if slot is empty or not
+	bool slotIsEmpty(uint16_t slotId) { return slots[slotId].isEmpty(); }
 };
 #endif

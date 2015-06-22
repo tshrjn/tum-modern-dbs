@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
 		assert(slotId == i);
 		sut1.storeData(slotId, (char*)(new TestStruct4(i, i/2)));
 	}
+	assert(sut1.getNumberSlots() == 2047);
 
 	// Test subsequent retrieval
 	std::cout << "SlottedPageTest: Test subsequent read" << std::endl;
@@ -109,6 +110,7 @@ int main(int argc, char* argv[]) {
 		assert(testStruct->a == i);
 		assert(testStruct->b == i/2);
 	}
+	std::cout << "SlottedPageTest: Read successfull" << std::endl;
 
 	assert(!sut2.canAllocateSlot(sizeof(TestStruct8)));
 	auto stored = 1364 * sizeof(TestStruct8);
@@ -142,6 +144,7 @@ int main(int argc, char* argv[]) {
 	assert(sut3.canReallocateSlot(sut3_1, sizeof(TestStruct6144)));
 	sut3.reallocateSlot(sut3_1, sizeof(TestStruct6144));
 	sut3.storeData(sut3_1, (char*)(new TestStruct6144((char) 1)));
+	assert(sut3.getNumberSlots() == 3);
 
 	// check if data is corrent
 	char* sut3_1_data_1 = (char*)sut3.getData(sut3_1);
