@@ -8,14 +8,8 @@ Printer::Printer(unique_ptr < Operator > && input)
         : input(move(input)),
           toPrint(this->input->getOutput()) { }
 
-Printer::Printer(
-        unique_ptr < Operator > && input,
-const
-vector<const Register *> &toPrint
-)
-:
-
-input(move(input)), toPrint(toPrint) { }
+Printer::Printer(unique_ptr < Operator > && input, const vector<const Register *> &toPrint)
+    : input(move(input)), toPrint(toPrint) { }
 
 void Printer::open() {
     input->open();
@@ -31,13 +25,10 @@ bool Printer::next() {
         if (index) cout << ' ';
         const Register &r = *toPrint[index];
         switch (r.getType()) {
-            case Register::Type::Undefined:
-                cout << "null";
-                break;
-            case Register::Type::Int:
+            case Types::Tag::Integer:
                 cout << r.getInt();
                 break;
-            case Register::Type::String:
+            case Types::Tag::Char:
                 cout << r.getString();
                 break;
         }

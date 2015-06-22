@@ -3,17 +3,10 @@
 
 using namespace std;
 
-Selection::Selection(
-        unique_ptr < Operator > && input,
-const
-Register *a,
-const Register *b
-)
-:
+Selection::Selection(unique_ptr < Operator > && input, const Register *a, const Register *b)
+    : input(move(input)), condition(a), equal(b)
+{
 
-input(move(input)),
-condition(a),
-equal(b) {
 }
 
 Selection::~Selection() { }
@@ -33,12 +26,10 @@ bool Selection::next() {
         if (equal) {
             if (condition->getType() == equal->getType())
                 switch (condition->getType()) {
-                    case Register::Type::Undefined:
-                        break;
-                    case Register::Type::Int:
+                    case Types::Tag::Integer:
                         if (condition->getInt() == equal->getInt()) return true;
                         break;
-                    case Register::Type::String:
+                    case Types::Tag::Char:
                         if (condition->getString() == equal->getString()) return true;
                         break;
                 }

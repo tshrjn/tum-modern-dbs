@@ -1,8 +1,21 @@
 #include "operator/Register.hpp"
 
-Register::Register() : type(Type::Undefined) { }
+Register::Register() { }
 
 Register::~Register() { }
+
+void Register::load(Types::Tag type, void *data) {
+    switch (type) {
+        case Types::Tag::Integer:
+            setInt(*reinterpret_cast<int64_t *>(data));
+            return;
+
+        case Types::Tag::Char: {
+            setString(reinterpret_cast<char *>(data));
+            return;
+        }
+    }
+}
 
 bool Register::operator==(const Register &r) const {
     // The type needs to be the same
@@ -11,11 +24,9 @@ bool Register::operator==(const Register &r) const {
     }
     // Compare the state based on the type
     switch (type) {
-        case Type::Undefined:
-            return true;
-        case Type::Int:
+        case Types::Tag::Integer:
             return intValue == r.intValue;
-        case Type::String:
+        case Types::Tag::Char:
             return stringValue == r.stringValue;
     }
     return false;
@@ -27,11 +38,9 @@ bool Register::operator<(const Register &r) const {
         return static_cast<unsigned>(type) < static_cast<unsigned>(r.type);
     }
     switch (type) {
-        case Type::Undefined:
-            return false;
-        case Type::Int:
+        case Types::Tag::Integer:
             return intValue < r.intValue;
-        case Type::String:
+        case Types::Tag::Char:
             return stringValue < r.stringValue;
     }
     return false;
@@ -51,11 +60,9 @@ static uint64_t computeHash(const void *buffer, unsigned len) {
 
 unsigned Register::getHash() const {
     switch (type) {
-        case Type::Undefined:
-            return 0;
-        case Type::Int:
+        case Types::Tag::Integer:
             return intValue;
-        case Type::String:
+        case Types::Tag::Char:
             return computeHash(stringValue.data(), stringValue.length());
     }
     return 0;

@@ -2,21 +2,18 @@
 #define REGISTER_HPP
 
 #include <string>
+#include "../src/schema/Types.cpp"
 
 class Register {
 public:
 
-    enum class Type : unsigned {
-        Int, String, Undefined
-    };
 
 private:
 
-    // The type of a given Register
-    Type type;
+    Types::Tag type;
 
     int intValue;
-    
+
     std::string stringValue;
 
 public:
@@ -24,24 +21,20 @@ public:
 
     ~Register();
 
-    // Setters
-    void setUnbound() { type = Type::Undefined; }
+    void load(Types::Tag type, void *data);
 
     void setInt(int value) {
-        type = Type::Int;
+        type = Types::Tag::Integer;
         intValue = value;
     }
 
     void setString(const std::string &value) {
-        type = Type::String;
+        type = Types::Tag::Char;
         stringValue = value;
     }
 
-    // Indicator if the Register type is defined or not
-    bool isUndefined() const { return type == Type::Undefined; }
-
     // Getters
-    Type getType() const { return type; }
+    Types::Tag getType() const { return type; }
 
     int getInt() const { return intValue; }
 
