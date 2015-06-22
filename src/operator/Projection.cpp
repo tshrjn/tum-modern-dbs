@@ -4,8 +4,8 @@ using namespace std;
 
 Projection::Projection(
    unique_ptr<Operator>&& input,
-   const vector<const Register*>& output)
-   : input(move(input)),output(output) {
+   const vector<uint>& registerIdzs)
+   : input(move(input)),registerIdzs(registerIdzs) {
 }
 
 Projection::~Projection() {
@@ -23,6 +23,12 @@ void Projection::close() {
    input->close();
 }
 
+// Simply fetch the output of the operator and copy a subset by using the previously stored target idzs 
 vector<const Register*> Projection::getOutput() const {
-   return output;
+	vector<const Register*> all=input->getOutput();
+	vector<const Register*> result(registerIdzs.size)
+   	for (auto iter=registerIdzs.begin(),limit=registerIdzs.end();iter!=limit;++iter)
+    	result.push_back(all[*iter]);
+
+   return result;
 }

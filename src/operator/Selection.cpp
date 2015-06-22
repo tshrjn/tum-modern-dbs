@@ -5,15 +5,6 @@ using namespace std;
 
 Selection::Selection(
    unique_ptr<Operator>&& input,
-   const Register* condition)
-   : input(move(input)),
-      condition(condition),
-      equal(0) {
-}
-
-
-Selection::Selection(
-   unique_ptr<Operator>&& input,
    const Register* a,
    const Register* b)
    : input(move(input)),

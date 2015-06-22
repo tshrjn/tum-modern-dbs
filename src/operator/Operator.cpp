@@ -2,5 +2,4 @@
 
 
 Operator::Operator() {}
-
 Operator::~Operator() {}

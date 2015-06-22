@@ -11,7 +11,6 @@ class Operator
    public:
    Operator();
    virtual ~Operator();
-
    virtual void open() = 0;
    virtual bool next() = 0;
    virtual std::vector<const Register*> getOutput() const = 0;

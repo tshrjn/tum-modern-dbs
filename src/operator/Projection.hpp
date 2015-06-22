@@ -8,10 +8,12 @@ class Projection : public Operator
 {
    private:
    std::unique_ptr<Operator> input;
-   std::vector<const Register*> output;
+   std::vector<uint> registerIdzs;
 
    public:
-   Projection(std::unique_ptr<Operator>&& input,const std::vector<const Register*>& output);
+   Projection(
+      std::unique_ptr<Operator>&& input,
+      const std::vector<uint>& registerIdzs);
    ~Projection();
 
    void open();

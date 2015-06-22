@@ -12,8 +12,7 @@ class Selection : public Operator
    const Register* equal;
 
    public:
-   Selection(std::unique_ptr<Operator>&& input, const Register* condition);
-   Selection(std::unique_ptr<Operator>&& input, const Register* a,const Register* b);
+   Selection(std::unique_ptr<Operator>&& input, const Register* a, const Register* b);
    ~Selection();
 
    void open();

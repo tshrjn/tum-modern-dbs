@@ -20,35 +20,45 @@ HashJoin::HashJoin(
 
 HashJoin::~HashJoin() {}
 
+// The open call of the hashjoin will clean the hashtable as
+// everything needs to be (re)hashed
 void HashJoin::open() {
    left->open();
    right->open();
-   // clear the hashtable on open
    table.clear();
 }
 
 
+// In the first run we need to build the complete hash table
+// Subsequently we just 
 bool HashJoin::next() {
    // At the first run we need to build the complete hash table with the left side
    if (table.empty()) {
       while (left->next()) {
          vector<Register> values;
          values.reserve(leftRegs.size());
+         // Copy the Registers and store them in a values vector
          for (auto iter=leftRegs.begin(),limit=leftRegs.end();iter!=limit;++iter)
             values.push_back(**iter);
+         // Then store everything into a multimap
          table.insert(make_pair(*leftValue,move(values)));
       }
       if (table.empty()) return false;
       iter=iterLimit=table.end();
    }
 
-   // Now probe the whole right side through the hash table
    while (true) {
+      // AFTER equal_range found a range of equal keys the tuples are produced iteratively
+      // Until the lower iterator hits the upper border again
+      // Meanwhile the right values stay untouched
       if (iter!=iterLimit) {
          const vector<Register>& values=(*iter).second;
-         auto reader=values.begin();
-         for (auto iter2=leftRegs.begin(),limit2=leftRegs.end();iter2!=limit2;++iter2,++reader)
-            **iter2=*reader;
+         auto iterValues=values.begin();
+         // Copy the found values to the result registers
+         for (auto iterRegs=leftRegs.begin(),limitRegs=leftRegs.end();
+               iterRegs!=limitRegs;
+               ++iterRegs,++iterValues)
+            **iterRegs=*iterValues;
          ++iter;
          return true;
       }
@@ -56,11 +66,16 @@ bool HashJoin::next() {
          right->close();
          return false;
       }
-      auto range=table.equal_range(*rightValue);
-      iter=range.first; iterLimit=range.second;
+
+      // Range of all elements in the table that have a key equal to the right register
+      auto leftRange=table.equal_range(*rightValue);
+
+      // The next tuple will be the range.first and right
+      iter=leftRange.first; iterLimit=leftRange.second;
    }
 }
 
+// Clear the hashtable again on close
 void HashJoin::close() {
    if (!table.empty()) {
       right->close();
@@ -69,6 +84,8 @@ void HashJoin::close() {
    left->close();
 }
 
+// Merge the left and right output togeher into one vector
+// TODO: Join attribute is in here twice
 vector<const Register*> HashJoin::getOutput() const {
    vector<const Register*> result=left->getOutput(),other=right->getOutput();
    for (auto iter=other.begin(),limit=other.end();iter!=limit;++iter)
